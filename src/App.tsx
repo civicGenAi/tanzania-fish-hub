@@ -36,6 +36,9 @@ import SellerCustomers from "./pages/seller/SellerCustomers";
 import SellerReviews from "./pages/seller/SellerReviews";
 import SellerNewProduct from "./pages/seller/SellerNewProduct";
 import SellerSettings from "./pages/seller/SellerSettings";
+import SellerDeliveries from "./pages/seller/SellerDeliveries";
+import SellerMessages from "./pages/seller/SellerMessages";
+import SellerNotifications from "./pages/seller/SellerNotifications";
 
 // Distributor pages
 import DistributorActive from "./pages/distributor/DistributorActive";
@@ -43,6 +46,12 @@ import DistributorQueue from "./pages/distributor/DistributorQueue";
 import DistributorMap from "./pages/distributor/DistributorMap";
 import DistributorEarnings from "./pages/distributor/DistributorEarnings";
 import DistributorSettings from "./pages/distributor/DistributorSettings";
+import DistributorSchedule from "./pages/distributor/DistributorSchedule";
+import DistributorPickups from "./pages/distributor/DistributorPickups";
+import DistributorCompleted from "./pages/distributor/DistributorCompleted";
+import DistributorHistory from "./pages/distributor/DistributorHistory";
+import DistributorSupport from "./pages/distributor/DistributorSupport";
+import DistributorNotifications from "./pages/distributor/DistributorNotifications";
 
 const queryClient = new QueryClient();
 
@@ -76,20 +85,30 @@ const App = () => (
               {/* Seller Dashboard Routes */}
               <Route path="/seller" element={<SellerDashboard />} />
               <Route path="/seller/products" element={<SellerProducts />} />
+              <Route path="/seller/products/new" element={<SellerNewProduct />} />
               <Route path="/seller/orders" element={<SellerOrders />} />
               <Route path="/seller/analytics" element={<SellerAnalytics />} />
               <Route path="/seller/earnings" element={<SellerEarnings />} />
               <Route path="/seller/customers" element={<SellerCustomers />} />
               <Route path="/seller/reviews" element={<SellerReviews />} />
+              <Route path="/seller/deliveries" element={<SellerDeliveries />} />
+              <Route path="/seller/messages" element={<SellerMessages />} />
+              <Route path="/seller/notifications" element={<SellerNotifications />} />
               <Route path="/seller/new-product" element={<SellerNewProduct />} />
               <Route path="/seller/settings" element={<SellerSettings />} />
 
               {/* Distributor Dashboard Routes */}
               <Route path="/distributor" element={<DistributorDashboard />} />
-              <Route path="/distributor/active" element={<DistributorActive />} />
               <Route path="/distributor/queue" element={<DistributorQueue />} />
+              <Route path="/distributor/active" element={<DistributorActive />} />
               <Route path="/distributor/map" element={<DistributorMap />} />
+              <Route path="/distributor/schedule" element={<DistributorSchedule />} />
+              <Route path="/distributor/pickups" element={<DistributorPickups />} />
+              <Route path="/distributor/completed" element={<DistributorCompleted />} />
+              <Route path="/distributor/history" element={<DistributorHistory />} />
               <Route path="/distributor/earnings" element={<DistributorEarnings />} />
+              <Route path="/distributor/support" element={<DistributorSupport />} />
+              <Route path="/distributor/notifications" element={<DistributorNotifications />} />
               <Route path="/distributor/settings" element={<DistributorSettings />} />
 
               {/* Admin Dashboard Route */}
