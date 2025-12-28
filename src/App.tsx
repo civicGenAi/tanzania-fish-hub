@@ -10,6 +10,7 @@ import Marketplace from "./pages/Marketplace";
 import FishDetail from "./pages/FishDetail";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
+import Help from "./pages/Help";
 import Dashboard from "./pages/Dashboard";
 import SellerDashboard from "./pages/SellerDashboard";
 import DistributorDashboard from "./pages/DistributorDashboard";
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="/fish/:id" element={<FishDetail />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/help" element={<Help />} />
 
               {/* Customer Dashboard Routes */}
               <Route path="/dashboard" element={<Dashboard />} />
