@@ -11,6 +11,9 @@ import FishDetail from "./pages/FishDetail";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import Help from "./pages/Help";
+import About from "./pages/About";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import Dashboard from "./pages/Dashboard";
 import SellerDashboard from "./pages/SellerDashboard";
 import DistributorDashboard from "./pages/DistributorDashboard";
@@ -70,6 +73,9 @@ const App = () => (
               <Route path="/cart" element={<Cart />} />
               <Route path="/login" element={<Login />} />
               <Route path="/help" element={<Help />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:id" element={<BlogPost />} />
 
               {/* Customer Dashboard Routes */}
               <Route path="/dashboard" element={<Dashboard />} />
