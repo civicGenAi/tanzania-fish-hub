@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
-import { Fish, Heart, Users, TrendingUp, Award, Leaf } from 'lucide-react';
+import { Fish, Heart, Users, TrendingUp, Award, Leaf, Anchor, Waves } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
