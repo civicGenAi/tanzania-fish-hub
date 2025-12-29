@@ -91,14 +91,6 @@ const About = () => {
 
   return (
     <Layout>
-      {/* Add Google Font */}
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap');
-        .elegant-font {
-          font-family: 'Dancing Script', cursive;
-        }
-      `}</style>
-
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-primary via-blue-500 to-secondary py-20 md:py-32 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
