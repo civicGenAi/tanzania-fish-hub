@@ -1,7 +1,7 @@
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, Clock, User, ArrowLeft, Share2, Facebook, Twitter, Mail, Tag, Heart, MessageCircle } from 'lucide-react';
+import { Calendar, Clock, User, ArrowLeft, Share2, Facebook, Twitter, Mail, Tag, Heart, MessageCircle, Bookmark, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const BlogPost = () => {
@@ -80,12 +80,12 @@ const BlogPost = () => {
       </ul>
 
       <h2>Where to Buy Fresh Tilapia</h2>
-      <p>For the freshest tilapia delivered straight to your door, order from Fish Happy! Our tilapia comes directly from Lake Victoria fishermen and is delivered within hours of being caught. Browse our selection in the <a href="/marketplace" class="text-primary hover:underline">marketplace</a>.</p>
+      <p>For the freshest tilapia delivered straight to your door, order from Fish Happy! Our tilapia comes directly from Lake Victoria fishermen and is delivered within hours of being caught. Browse our selection in the <a href="/marketplace" class="text-primary hover:underline font-medium">marketplace</a>.</p>
 
       <h2>Conclusion</h2>
       <p>Tilapia is versatile, delicious, and deeply rooted in Tanzanian culinary culture. Whether you prefer it grilled, fried, in coconut sauce, or in a curry, there's a preparation method for everyone. The key is starting with fresh, quality fish—and that's exactly what Fish Happy delivers.</p>
 
-      <p class="text-muted-foreground italic">Happy cooking! Share your tilapia creations with us on social media using #FishHappyTanzania</p>
+      <p class="text-muted-foreground italic mt-8">Happy cooking! Share your tilapia creations with us on social media using #FishHappyTanzania</p>
     `,
     likes: 342,
     comments: 28,
@@ -117,136 +117,171 @@ const BlogPost = () => {
 
   return (
     <Layout>
-      {/* Back Button */}
+      {/* Breadcrumb */}
       <div className="border-b bg-muted/30">
         <div className="container mx-auto px-4 py-4">
-          <Link to="/blog">
-            <Button variant="ghost" size="sm" className="group">
-              <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-              Back to Blog
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Link to="/" className="hover:text-primary transition-colors">Home</Link>
+            <ChevronRight className="h-4 w-4" />
+            <Link to="/blog" className="hover:text-primary transition-colors">Blog</Link>
+            <ChevronRight className="h-4 w-4" />
+            <span className="text-foreground font-medium truncate max-w-[200px]">{post.title}</span>
+          </div>
         </div>
       </div>
 
       {/* Hero Section */}
-      <section className="py-8 md:py-12 bg-gradient-to-b from-muted/30 to-transparent">
+      <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
+            {/* Back Button */}
+            <Link to="/blog" className="inline-flex mb-8">
+              <Button variant="ghost" size="sm" className="group gap-2 hover:bg-primary/5">
+                <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+                Back to Blog
+              </Button>
+            </Link>
+
             {/* Category Badge */}
-            <div className="mb-4">
-              <span className="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
+            <div className="mb-4 animate-fade-in">
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary/10 to-secondary/10 text-primary rounded-full text-sm font-medium">
                 {post.category}
               </span>
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight animate-slide-up">
               {post.title}
             </h1>
 
             {/* Meta Info */}
-            <div className="flex flex-wrap items-center gap-4 md:gap-6 text-sm text-muted-foreground mb-6">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span className="font-medium text-foreground">{post.author.name}</span>
+            <div className="flex flex-wrap items-center gap-4 md:gap-6 mb-8 animate-slide-up" style={{ animationDelay: '100ms' }}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+                  <span className="text-xl">{post.author.avatar}</span>
+                </div>
+                <div>
+                  <span className="font-medium text-foreground">{post.author.name}</span>
+                  <p className="text-xs text-muted-foreground">{post.author.role}</p>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
                 <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Clock className="h-4 w-4" />
                 <span>{post.readTime}</span>
               </div>
             </div>
 
             {/* Featured Image */}
-            <div className="bg-gradient-to-br from-primary to-secondary rounded-3xl p-16 md:p-24 flex items-center justify-center mb-8 shadow-xl">
-              <div className="text-8xl md:text-9xl">{post.image}</div>
+            <div 
+              className="relative bg-gradient-to-br from-primary via-primary/90 to-secondary rounded-3xl p-16 md:p-24 flex items-center justify-center mb-10 shadow-2xl overflow-hidden animate-scale-in"
+              style={{ animationDelay: '200ms' }}
+            >
+              {/* Decorative Elements */}
+              <div className="absolute top-0 left-0 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+              <div className="absolute bottom-0 right-0 w-60 h-60 bg-secondary/30 rounded-full blur-3xl" />
+              
+              <div className="text-8xl md:text-9xl relative z-10 animate-float">{post.image}</div>
             </div>
 
-            {/* Social Share Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pb-8 border-b">
-              <span className="text-sm font-medium mr-2">Share:</span>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Facebook className="h-4 w-4" />
-                <span className="hidden sm:inline">Facebook</span>
-              </Button>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Twitter className="h-4 w-4" />
-                <span className="hidden sm:inline">Twitter</span>
-              </Button>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Mail className="h-4 w-4" />
-                <span className="hidden sm:inline">Email</span>
-              </Button>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Share2 className="h-4 w-4" />
-                <span className="hidden sm:inline">More</span>
-              </Button>
+            {/* Action Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-8 border-b animate-fade-in" style={{ animationDelay: '300ms' }}>
+              {/* Engagement Stats */}
+              <div className="flex items-center gap-4">
+                <button className="flex items-center gap-2 text-muted-foreground hover:text-accent transition-colors group">
+                  <div className="w-9 h-9 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                    <Heart className="h-4 w-4" />
+                  </div>
+                  <span className="font-medium">{post.likes}</span>
+                </button>
+                <button className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group">
+                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <MessageCircle className="h-4 w-4" />
+                  </div>
+                  <span className="font-medium">{post.comments}</span>
+                </button>
+                <button className="flex items-center gap-2 text-muted-foreground hover:text-secondary transition-colors group">
+                  <div className="w-9 h-9 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
+                    <Bookmark className="h-4 w-4" />
+                  </div>
+                </button>
+              </div>
+
+              {/* Share Buttons */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-muted-foreground mr-1">Share:</span>
+                <Button variant="outline" size="icon" className="w-9 h-9 rounded-full hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all">
+                  <Facebook className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="icon" className="w-9 h-9 rounded-full hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all">
+                  <Twitter className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="icon" className="w-9 h-9 rounded-full hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all">
+                  <Mail className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="icon" className="w-9 h-9 rounded-full hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all">
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Article Content */}
-      <article className="py-8 md:py-12">
+      <article className="pb-12 md:pb-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div
               className="prose prose-lg max-w-none
                 prose-headings:font-bold prose-headings:text-foreground
-                prose-h2:text-2xl prose-h2:md:text-3xl prose-h2:mt-12 prose-h2:mb-4
+                prose-h2:text-2xl prose-h2:md:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-border/50
                 prose-h3:text-xl prose-h3:md:text-2xl prose-h3:mt-8 prose-h3:mb-3
                 prose-p:text-muted-foreground prose-p:leading-relaxed prose-p:mb-4
-                prose-ul:my-6 prose-li:text-muted-foreground
+                prose-ul:my-6 prose-li:text-muted-foreground prose-li:marker:text-primary
                 prose-strong:text-foreground prose-strong:font-semibold
-                prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-                prose-lead:text-xl prose-lead:md:text-2xl prose-lead:text-foreground prose-lead:mb-8"
+                prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-a:font-medium
+                prose-lead:text-xl prose-lead:md:text-2xl prose-lead:text-foreground prose-lead:mb-8 prose-lead:font-normal prose-lead:leading-relaxed"
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
 
             {/* Tags */}
             <div className="mt-12 pt-8 border-t">
-              <div className="flex items-center gap-2 flex-wrap">
-                <Tag className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Tag className="h-4 w-4" />
+                  <span className="text-sm font-medium">Tags:</span>
+                </div>
                 {post.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="px-3 py-1 bg-muted hover:bg-muted/80 rounded-full text-sm transition-colors cursor-pointer"
+                    className="px-4 py-1.5 bg-muted hover:bg-primary/10 hover:text-primary rounded-full text-sm transition-colors cursor-pointer"
                   >
                     {tag}
                   </span>
                 ))}
               </div>
             </div>
-
-            {/* Engagement Stats */}
-            <div className="mt-8 flex items-center gap-6">
-              <button className="flex items-center gap-2 text-muted-foreground hover:text-accent transition-colors">
-                <Heart className="h-5 w-5" />
-                <span className="font-medium">{post.likes}</span>
-              </button>
-              <button className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
-                <MessageCircle className="h-5 w-5" />
-                <span className="font-medium">{post.comments} Comments</span>
-              </button>
-            </div>
           </div>
         </div>
       </article>
 
       {/* Author Bio */}
-      <section className="py-8 md:py-12 bg-muted/30">
+      <section className="py-12 md:py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-card rounded-2xl p-6 md:p-8 shadow-lg">
-              <div className="flex flex-col sm:flex-row gap-6">
-                <div className="text-6xl md:text-7xl flex-shrink-0">{post.author.avatar}</div>
+            <div className="bg-card rounded-3xl p-8 md:p-10 shadow-lg border border-border/50">
+              <div className="flex flex-col sm:flex-row gap-6 items-start">
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center flex-shrink-0">
+                  <span className="text-5xl md:text-6xl">{post.author.avatar}</span>
+                </div>
                 <div className="flex-1">
+                  <span className="text-sm text-primary font-medium mb-1 block">Written by</span>
                   <h3 className="text-xl md:text-2xl font-bold mb-1">{post.author.name}</h3>
-                  <p className="text-primary font-medium mb-3">{post.author.role}</p>
+                  <p className="text-muted-foreground text-sm mb-4">{post.author.role}</p>
                   <p className="text-muted-foreground leading-relaxed">{post.author.bio}</p>
                 </div>
               </div>
@@ -259,25 +294,35 @@ const BlogPost = () => {
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8">Related Articles</h2>
+            <div className="flex items-center gap-2 mb-8">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-secondary to-primary flex items-center justify-center">
+                <Bookmark className="h-5 w-5 text-white" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold">Related Articles</h2>
+            </div>
+            
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {relatedPosts.map((relatedPost) => (
+              {relatedPosts.map((relatedPost, index) => (
                 <Link key={relatedPost.id} to={`/blog/${relatedPost.id}`}>
-                  <article className="group bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 h-full">
-                    <div className="bg-gradient-to-br from-primary/10 to-secondary/10 p-12 flex items-center justify-center">
-                      <div className="text-5xl group-hover:scale-110 transition-transform">
+                  <article 
+                    className="group bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 h-full border border-border/50 animate-slide-up"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className="relative bg-gradient-to-br from-primary/10 via-muted/50 to-secondary/10 p-10 flex items-center justify-center overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="text-5xl group-hover:scale-110 transition-transform duration-500 relative z-10">
                         {relatedPost.image}
                       </div>
                     </div>
                     <div className="p-6">
-                      <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
+                      <span className="px-3 py-1 bg-gradient-to-r from-primary/10 to-secondary/10 text-primary rounded-full text-xs font-medium">
                         {relatedPost.category}
                       </span>
-                      <h3 className="text-lg font-bold mt-3 mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                      <h3 className="text-lg font-bold mt-3 mb-2 group-hover:text-primary transition-colors duration-300 line-clamp-2">
                         {relatedPost.title}
                       </h3>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
+                        <Clock className="h-3.5 w-3.5" />
                         <span>{relatedPost.readTime}</span>
                       </div>
                     </div>
@@ -290,15 +335,27 @@ const BlogPost = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 md:py-16 bg-gradient-to-br from-primary via-blue-500 to-secondary">
-        <div className="container mx-auto px-4">
+      <section className="py-16 md:py-24 relative overflow-hidden">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-secondary" />
+        
+        {/* Decorative Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-0 left-1/3 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-float" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-2xl mx-auto text-center text-white">
+            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center">
+              <span className="text-3xl">🐟</span>
+            </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Try These Recipes?</h2>
-            <p className="text-lg md:text-xl mb-8 text-white/90">
+            <p className="text-lg md:text-xl mb-8 text-white/80">
               Order fresh tilapia and other fish from our marketplace
             </p>
             <Link to="/marketplace">
-              <Button size="lg" variant="secondary" className="shadow-xl">
+              <Button size="lg" className="bg-white text-primary hover:bg-white/90 shadow-2xl hover:shadow-white/20 transition-all duration-300 hover:scale-105">
                 Browse Fresh Fish
               </Button>
             </Link>
