@@ -129,6 +129,14 @@ const Blog = () => {
 
   return (
     <Layout>
+      {/* Add Google Font */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap');
+        .elegant-font {
+          font-family: 'Dancing Script', cursive;
+        }
+      `}</style>
+
       {/* Hero Section */}
       <section className="relative min-h-[50vh] flex items-center overflow-hidden">
         {/* Background */}
