@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
-import { Fish, Heart, Users, TrendingUp, Award, Leaf } from 'lucide-react';
+import { Fish, Heart, Users, TrendingUp, Award, Leaf, Anchor, Waves } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
@@ -91,14 +91,6 @@ const About = () => {
 
   return (
     <Layout>
-      {/* Add Google Font */}
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap');
-        .elegant-font {
-          font-family: 'Dancing Script', cursive;
-        }
-      `}</style>
-
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-primary via-blue-500 to-secondary py-20 md:py-32 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
