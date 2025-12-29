@@ -44,25 +44,48 @@ const About = () => {
       icon: Fish,
       title: 'Freshness First',
       description: 'We guarantee the freshest catch, delivered within hours of being caught.',
-      gradient: 'from-primary to-blue-400',
     },
     {
       icon: Users,
       title: 'Community Empowerment',
       description: 'Supporting local fishermen families and creating sustainable livelihoods.',
-      gradient: 'from-secondary to-green-400',
     },
     {
       icon: Leaf,
       title: 'Sustainability',
       description: 'Promoting responsible fishing practices to protect our oceans for future generations.',
-      gradient: 'from-green-500 to-emerald-400',
     },
     {
       icon: Award,
       title: 'Quality Assurance',
       description: 'Every fish is inspected and meets our strict quality and safety standards.',
-      gradient: 'from-accent to-orange-400',
+    },
+  ];
+
+  const timeline = [
+    {
+      year: '2020',
+      title: 'Born from the Ocean',
+      description: 'Fish Happy was founded by Juma Mwinyipembe, a third-generation fisherman who witnessed the challenges local fishermen faced.',
+      icon: Anchor,
+    },
+    {
+      year: '2021',
+      title: 'A Vision for Change',
+      description: 'Partnered with technology experts to build a platform connecting fishermen directly with customers.',
+      icon: Heart,
+    },
+    {
+      year: '2023',
+      title: 'Growing Together',
+      description: 'Reached 15,000+ customers and 2,500+ fishing families across Tanzania.',
+      icon: TrendingUp,
+    },
+    {
+      year: '2025',
+      title: 'The Future',
+      description: 'Expanding across East Africa while maintaining our commitment to sustainability and community.',
+      icon: Waves,
     },
   ];
 
@@ -83,7 +106,14 @@ const About = () => {
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         </div>
 
-        <div className="container mx-auto px-4 relative z-10">
+        {/* Wave Pattern */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 opacity-20">
+          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+            <path d="M0,60 C240,120 480,0 720,60 C960,120 1200,0 1440,60 L1440,120 L0,120 Z" fill="white"/>
+          </svg>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10 py-20">
           <div className="max-w-4xl mx-auto text-center text-white">
             <div className="inline-flex items-center justify-center w-24 h-24 md:w-32 md:h-32 bg-white/20 backdrop-blur-md rounded-full mb-8 animate-bounce">
               <Fish className="h-12 w-12 md:h-16 md:w-16" />
@@ -106,77 +136,68 @@ const About = () => {
         </div>
       </section>
 
-      {/* Our Story Section */}
-      <section className="py-16 md:py-24">
+      {/* Timeline Section */}
+      <section className="py-16 md:py-24 bg-muted/30">
         <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
+              Our Journey
+            </span>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">The Story of Fish Happy</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              From humble beginnings to transforming Tanzania's fishing industry
+            </p>
+          </div>
+
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Story</h2>
-              <div className="w-20 h-1 bg-gradient-to-r from-primary to-secondary mx-auto rounded-full" />
-            </div>
+            <div className="relative">
+              {/* Timeline Line */}
+              <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-secondary to-accent md:-translate-x-1/2" />
 
-            <div className="space-y-8 md:space-y-12">
-              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl p-6 md:p-10">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Fish className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+              {/* Timeline Items */}
+              {timeline.map((item, index) => (
+                <div 
+                  key={index}
+                  className={`relative flex items-start gap-6 md:gap-12 mb-12 last:mb-0 ${
+                    index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
+                  }`}
+                >
+                  {/* Dot */}
+                  <div className="absolute left-4 md:left-1/2 w-8 h-8 -translate-x-1/2 rounded-full bg-card border-4 border-primary flex items-center justify-center shadow-lg z-10">
+                    <item.icon className="h-3.5 w-3.5 text-primary" />
                   </div>
-                  <div>
-                    <h3 className="text-xl md:text-2xl font-bold mb-3">Born from the Ocean</h3>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Fish Happy was founded in 2020 by Juma Mwinyipembe, a third-generation fisherman from
-                      Dar es Salaam. Growing up in a fishing village, Juma witnessed firsthand the challenges
-                      local fishermen faced—middlemen taking most profits, fish spoiling before reaching markets,
-                      and families struggling to make ends meet.
-                    </p>
+
+                  {/* Content */}
+                  <div className={`ml-16 md:ml-0 md:w-1/2 ${index % 2 === 0 ? 'md:pr-16 md:text-right' : 'md:pl-16'}`}>
+                    <div className="bg-card rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 group hover:-translate-y-1 border border-border/50">
+                      <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-bold mb-3">
+                        {item.year}
+                      </span>
+                      <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+                        {item.title}
+                      </h3>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl p-6 md:p-10">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 bg-secondary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Heart className="h-6 w-6 md:h-8 md:w-8 text-secondary" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl md:text-2xl font-bold mb-3">A Vision for Change</h3>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Determined to create a better future, Juma partnered with technology experts and community
-                      leaders to build a platform that connects fishermen directly with customers. By cutting out
-                      middlemen, we ensure fishermen earn fair prices while customers get the freshest fish at
-                      affordable rates.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-3xl p-6 md:p-10">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-12 h-12 md:w-16 md:h-16 bg-accent/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <TrendingUp className="h-6 w-6 md:h-8 md:w-8 text-accent" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl md:text-2xl font-bold mb-3">Growing Together</h3>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Today, Fish Happy serves over 15,000 customers across Tanzania and supports more than 2,500
-                      fishing families. We've delivered over 500,000 fish while maintaining our commitment to
-                      sustainability, quality, and community empowerment. This is just the beginning of our journey.
-                    </p>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
       {/* Values Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-b from-muted/30 to-transparent">
+      <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Our Values</h2>
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-1.5 bg-secondary/10 text-secondary rounded-full text-sm font-medium mb-4">
+              What We Stand For
+            </span>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">Our Core Values</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              These core principles guide everything we do
+              These principles guide everything we do
             </p>
           </div>
 
@@ -184,13 +205,22 @@ const About = () => {
             {values.map((value, index) => (
               <div
                 key={index}
-                className="group bg-card rounded-2xl p-6 md:p-8 shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2"
+                className="group relative bg-card rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-border/50 overflow-hidden"
               >
-                <div className={`w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br ${value.gradient} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                  <value.icon className="h-7 w-7 md:h-8 md:w-8 text-white" />
+                {/* Hover Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
+                    <value.icon className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
+                    {value.title}
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {value.description}
+                  </p>
                 </div>
-                <h3 className="text-xl md:text-2xl font-bold mb-3">{value.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{value.description}</p>
               </div>
             ))}
           </div>
@@ -198,10 +228,13 @@ const About = () => {
       </section>
 
       {/* Team Section */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 bg-gradient-to-b from-muted/30 to-transparent">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Meet Our Team</h2>
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-1.5 bg-accent/10 text-accent rounded-full text-sm font-medium mb-4">
+              The People Behind
+            </span>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">Meet Our Team</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Passionate individuals transforming Tanzania's fishing industry
             </p>
@@ -235,22 +268,35 @@ const About = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-20 bg-gradient-to-br from-primary via-blue-500 to-secondary">
-        <div className="container mx-auto px-4">
+      <section className="py-20 md:py-28 relative overflow-hidden">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-secondary" />
+        
+        {/* Decorative Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float" />
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-secondary/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '3s' }} />
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center text-white">
-            <h2 className="elegant-font text-4xl md:text-5xl mb-6">Join Our Community</h2>
-            <p className="text-lg md:text-xl mb-8 text-white/90 leading-relaxed">
-              Experience the freshest catch from local fishermen
+            <div className="w-20 h-20 mx-auto mb-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center">
+              <Fish className="h-10 w-10" />
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">Join Our Community</h2>
+            <p className="text-lg md:text-xl mb-10 text-white/80 leading-relaxed max-w-xl mx-auto">
+              Whether you're a customer looking for fresh fish or a fisherman wanting to expand your reach,
+              Fish Happy welcomes you.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/marketplace">
-                <Button size="lg" variant="secondary" className="w-full sm:w-auto shadow-xl">
+                <Button size="lg" className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 shadow-2xl hover:shadow-white/20 transition-all duration-300 hover:scale-105">
                   <Fish className="h-5 w-5 mr-2" />
                   Start Shopping
                 </Button>
               </Link>
               <Link to="/seller">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10 backdrop-blur-sm">
                   <Users className="h-5 w-5 mr-2" />
                   Become a Seller
                 </Button>
