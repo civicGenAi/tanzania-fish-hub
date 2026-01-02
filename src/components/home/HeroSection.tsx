@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Fish, Truck, Shield, Waves, Anchor, Ship, Store, Home, ChefHat, Users, MapPin, Clock, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Truck, Shield, Anchor, Ship, Store, ChefHat, Users, MapPin, Clock, CheckCircle2, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { stats } from '@/data/fishData';
+
+// Ocean video from Pexels CDN
+const OCEAN_VIDEO_URL = "https://videos.pexels.com/video-files/1093662/1093662-uhd_2560_1440_30fps.mp4";
 
 const ecosystemSteps = [
   {
@@ -44,66 +47,76 @@ const ecosystemSteps = [
 
 const HeroSection: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setIsAnimating(true);
-      setTimeout(() => {
-        setActiveStep((prev) => (prev + 1) % ecosystemSteps.length);
-        setIsAnimating(false);
-      }, 500);
+      setActiveStep((prev) => (prev + 1) % ecosystemSteps.length);
     }, 4000);
 
     return () => clearInterval(interval);
   }, []);
 
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-b from-background via-ocean-light/30 to-background">
-      {/* Animated Ocean Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Animated Waves */}
-        <div className="absolute bottom-0 left-0 right-0 h-64">
-          <svg className="absolute bottom-0 w-full h-40 animate-wave-slow" viewBox="0 0 1440 120" preserveAspectRatio="none">
-            <path 
-              fill="hsl(var(--primary) / 0.08)" 
-              d="M0,60 C240,120 480,0 720,60 C960,120 1200,0 1440,60 L1440,120 L0,120 Z"
-            />
-          </svg>
-          <svg className="absolute bottom-0 w-full h-32 animate-wave-medium" viewBox="0 0 1440 120" preserveAspectRatio="none">
-            <path 
-              fill="hsl(var(--primary) / 0.05)" 
-              d="M0,80 C360,20 720,100 1080,40 C1260,10 1380,60 1440,80 L1440,120 L0,120 Z"
-            />
-          </svg>
-          <svg className="absolute bottom-0 w-full h-24 animate-wave-fast" viewBox="0 0 1440 120" preserveAspectRatio="none">
-            <path 
-              fill="hsl(var(--primary) / 0.03)" 
-              d="M0,100 C180,60 360,100 540,80 C720,60 900,100 1080,80 C1260,60 1380,90 1440,100 L1440,120 L0,120 Z"
-            />
-          </svg>
-        </div>
+    <section className="relative min-h-screen flex items-center overflow-hidden">
+      {/* Video Background */}
+      <div className="absolute inset-0 z-0">
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          onLoadedData={() => setIsVideoLoaded(true)}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+            isVideoLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          <source src={OCEAN_VIDEO_URL} type="video/mp4" />
+        </video>
+        
+        {/* Video Overlay Gradients */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/50 to-background/90" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-background/60" />
+        
+        {/* Fallback gradient while video loads */}
+        <div className={`absolute inset-0 bg-gradient-to-b from-primary/20 via-background to-background transition-opacity duration-1000 ${
+          isVideoLoaded ? 'opacity-0' : 'opacity-100'
+        }`} />
+      </div>
 
-        {/* Floating Particles */}
-        <div className="absolute inset-0">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-2 h-2 rounded-full bg-primary/20 animate-float-particle"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 5}s`,
-                animationDuration: `${8 + Math.random() * 4}s`,
-              }}
-            />
-          ))}
-        </div>
+      {/* Mute/Unmute Button */}
+      <button
+        onClick={toggleMute}
+        className="absolute bottom-24 right-6 z-20 p-3 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 text-foreground hover:bg-card transition-all duration-300 shadow-lg"
+        aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+      >
+        {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+      </button>
 
-        {/* Gradient Orbs */}
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse-slow" />
-        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-gradient-radial from-primary/5 to-transparent rounded-full" />
+      {/* Subtle Floating Particles over video */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-[1]">
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1.5 h-1.5 rounded-full bg-primary-foreground/30 animate-float-particle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${8 + Math.random() * 4}s`,
+            }}
+          />
+        ))}
       </div>
 
       <div className="container relative z-10 py-12">
