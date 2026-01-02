@@ -1,209 +1,241 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Fish, Package, Truck, Users, Home, ShoppingBag } from 'lucide-react';
+import { ArrowRight, Volume2, VolumeX, Anchor, Ship, Truck, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { stats } from '@/data/fishData';
+
+// Ocean video from Pexels CDN
+const OCEAN_VIDEO_URL = "https://videos.pexels.com/video-files/1093662/1093662-uhd_2560_1440_30fps.mp4";
+
+const statsData = [
+  { value: '2.5K+', label: 'Fishermen', icon: Anchor, delay: 0 },
+  { value: '50K+', label: 'Orders Delivered', icon: Ship, delay: 0.2 },
+  { value: '98%', label: 'Satisfaction', icon: Users, delay: 0.4 },
+  { value: '5+', label: 'Regions', icon: Truck, delay: 0.6 },
+];
 
 const HeroSection: React.FC = () => {
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [activeStatIndex, setActiveStatIndex] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveStatIndex((prev) => (prev + 1) % statsData.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-r from-blue-50 via-green-50 to-orange-50">
-      {/* Animated Ecosystem Journey */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Ocean Scene - Left */}
-        <div className="absolute left-0 top-0 bottom-0 w-1/3">
-          {/* Animated Waves */}
-          <svg className="absolute bottom-0 left-0 w-full h-48 opacity-30" viewBox="0 0 1440 320" preserveAspectRatio="none">
-            <path fill="#0EA5E9" d="M0,160 Q120,200 240,160 T480,160 L480,320 L0,320 Z" className="animate-[wave_8s_ease-in-out_infinite]" />
-            <path fill="#0EA5E9" fillOpacity="0.5" d="M0,192 Q100,224 200,192 T400,192 L400,320 L0,320 Z" className="animate-[wave_12s_ease-in-out_infinite_reverse]" />
-          </svg>
-
-          {/* Fishing Boat */}
-          <div className="absolute left-1/4 top-1/3 animate-[bob_3s_ease-in-out_infinite]">
-            <div className="relative">
-              <div className="text-6xl">⛵</div>
-              <div className="absolute -right-2 -top-2 text-2xl animate-[cast_4s_ease-in-out_infinite]">🎣</div>
-            </div>
-          </div>
-
-          {/* Fisherman Icon */}
-          <div className="absolute left-1/2 bottom-1/3 opacity-70">
-            <Users className="h-16 w-16 text-primary animate-pulse" />
-          </div>
-        </div>
-
-        {/* Platform Hub - Center */}
-        <div className="absolute left-1/3 right-1/3 top-0 bottom-0 flex items-center justify-center">
-          <div className="relative">
-            {/* Central Hub */}
-            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-2xl animate-[pulse_3s_ease-in-out_infinite]">
-              <Fish className="h-16 w-16 md:h-20 md:h-20 text-white" />
-            </div>
-
-            {/* Orbiting Particles */}
-            <div className="absolute inset-0 animate-[spin_20s_linear_infinite]">
-              <Package className="absolute -top-8 left-1/2 -translate-x-1/2 h-6 w-6 text-primary" />
-              <Package className="absolute bottom-0 left-0 h-6 w-6 text-secondary" />
-              <Package className="absolute bottom-0 right-0 h-6 w-6 text-accent" />
-            </div>
-
-            {/* Pulse Rings */}
-            <div className="absolute inset-0 -m-8">
-              <div className="absolute inset-0 border-2 border-primary/30 rounded-full animate-ping" style={{ animationDuration: '3s' }} />
-              <div className="absolute inset-0 border-2 border-secondary/30 rounded-full animate-ping" style={{ animationDuration: '3s', animationDelay: '1s' }} />
-            </div>
-          </div>
-        </div>
-
-        {/* Delivery & Customer - Right */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/3">
-          {/* Delivery Truck */}
-          <div className="absolute right-1/3 top-1/3 animate-[drive_8s_ease-in-out_infinite]">
-            <Truck className="h-12 w-12 md:h-16 md:w-16 text-secondary" />
-          </div>
-
-          {/* Customer Receiving */}
-          <div className="absolute right-1/4 bottom-1/3">
-            <div className="relative">
-              <div className="text-6xl animate-[wave-hand_2s_ease-in-out_infinite]">👨🏿‍🍳</div>
-              <ShoppingBag className="absolute -right-2 -top-2 h-8 w-8 text-accent animate-bounce" />
-            </div>
-          </div>
-
-          {/* House Icon */}
-          <div className="absolute right-12 top-1/2 opacity-70">
-            <Home className="h-16 w-16 text-accent" />
-          </div>
-        </div>
-
-        {/* Swimming Fish - Connecting Flow */}
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute top-1/2 -translate-y-1/2 text-2xl md:text-4xl opacity-60"
-            style={{
-              left: '-5%',
-              animation: `swim ${10 + i * 2}s linear infinite`,
-              animationDelay: `${i * 1.5}s`,
-            }}
-          >
-            🐟
-          </div>
-        ))}
-
-        {/* Dotted Connection Line */}
-        <svg className="absolute top-1/2 -translate-y-1/2 w-full h-2" preserveAspectRatio="none">
-          <line
-            x1="10%"
-            y1="50%"
-            x2="90%"
-            y2="50%"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeDasharray="10,10"
-            className="text-primary/20 animate-[dash_20s_linear_infinite]"
-          />
-        </svg>
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Video Background */}
+      <div className="absolute inset-0 z-0">
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          onLoadedData={() => setIsVideoLoaded(true)}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+            isVideoLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          <source src={OCEAN_VIDEO_URL} type="video/mp4" />
+        </video>
+        
+        {/* Video Overlay Gradients */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/40 to-background/95" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/50 via-transparent to-background/50" />
+        
+        {/* Fallback gradient while video loads */}
+        <div className={`absolute inset-0 bg-gradient-to-b from-primary/20 via-background to-background transition-opacity duration-1000 ${
+          isVideoLoaded ? 'opacity-0' : 'opacity-100'
+        }`} />
       </div>
 
-      {/* Content Overlay */}
-      <div className="container relative z-10">
-        <div className="max-w-3xl mx-auto text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/80 backdrop-blur-sm shadow-lg mb-8 animate-slide-up">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-secondary"></span>
-            </span>
-            <span className="text-sm font-medium text-primary">
-              Connecting Ocean to Table • {stats.regionsServed} Regions
-            </span>
-          </div>
+      {/* Mute/Unmute Button */}
+      <button
+        onClick={toggleMute}
+        className="absolute top-24 right-6 z-20 p-3 rounded-full bg-card/60 backdrop-blur-md border border-primary-foreground/20 text-primary-foreground hover:bg-card/80 transition-all duration-300 shadow-lg"
+        aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+      >
+        {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+      </button>
 
-          {/* Headline */}
-          <div className="space-y-6 mb-10 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold leading-tight">
-              Fresh Fish,
-              <span className="block elegant-font bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                From Ocean to Your Table
-              </span>
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Tanzania's complete fish ecosystem. Supporting local fishermen, ensuring freshness, delivering happiness.
-            </p>
-          </div>
+      {/* Bubbles Animation */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-[1]">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-primary-foreground/20 animate-bubble"
+            style={{
+              left: `${Math.random() * 100}%`,
+              bottom: '-20px',
+              width: `${4 + Math.random() * 12}px`,
+              height: `${4 + Math.random() * 12}px`,
+              animationDelay: `${Math.random() * 8}s`,
+              animationDuration: `${6 + Math.random() * 6}s`,
+            }}
+          />
+        ))}
+      </div>
 
+      {/* Main Content */}
+      <div className="container relative z-10 flex flex-col items-center justify-center min-h-screen py-20">
+        {/* Centered Headline */}
+        <div className="text-center mb-16 animate-slide-up">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-none tracking-tight">
+            <span className="block text-primary-foreground drop-shadow-lg mb-2">From Ocean</span>
+            <span className="block bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent animate-gradient drop-shadow-lg">
+              To Your Table
+            </span>
+          </h1>
+          
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <div className="flex flex-wrap justify-center gap-4 mt-10">
             <Link to="/marketplace">
-              <Button size="xl" className="w-full sm:w-auto bg-gradient-to-r from-primary to-secondary hover:shadow-2xl transition-all duration-300 hover:scale-105 group">
-                Browse Marketplace
-                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+              <Button size="lg" className="group px-8 py-6 text-lg rounded-full shadow-2xl hover:shadow-primary/30 transition-all duration-300 bg-primary hover:bg-primary/90">
+                Explore Marketplace
+                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
             <Link to="/sell">
-              <Button variant="outline" size="xl" className="w-full sm:w-auto hover:bg-white/80 backdrop-blur-sm">
-                Become a Seller
+              <Button variant="outline" size="lg" className="px-8 py-6 text-lg rounded-full border-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 backdrop-blur-sm">
+                Start Selling
               </Button>
             </Link>
           </div>
+        </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 md:gap-8 max-w-2xl mx-auto pt-8 border-t border-border/50 animate-slide-up" style={{ animationDelay: '0.3s' }}>
-            {[
-              { value: `${(stats.fishermen / 1000).toFixed(1)}K+`, label: 'Fishermen', icon: Users },
-              { value: `${(stats.ordersDelivered / 1000).toFixed(0)}K+`, label: 'Orders', icon: Package },
-              { value: `${stats.satisfactionRate}%`, label: 'Happy Customers', icon: Fish },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center bg-white/60 backdrop-blur-sm rounded-2xl p-4 shadow-lg">
-                <stat.icon className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-                <p className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  {stat.value}
-                </p>
-                <p className="text-xs md:text-sm text-muted-foreground font-medium">{stat.label}</p>
-              </div>
-            ))}
+        {/* Aquatic Stats Display */}
+        <div className="w-full max-w-5xl mx-auto mt-auto">
+          {/* Wave Container */}
+          <div className="relative">
+            {/* Animated Wave SVG */}
+            <svg 
+              className="absolute -top-16 left-0 w-full h-20 animate-wave-slow" 
+              viewBox="0 0 1440 80" 
+              preserveAspectRatio="none"
+            >
+              <path 
+                fill="hsl(var(--primary) / 0.15)" 
+                d="M0,40 C150,80 300,0 450,40 C600,80 750,0 900,40 C1050,80 1200,0 1350,40 L1440,40 L1440,80 L0,80 Z"
+              />
+            </svg>
+            <svg 
+              className="absolute -top-12 left-0 w-full h-16 animate-wave-medium" 
+              viewBox="0 0 1440 80" 
+              preserveAspectRatio="none"
+            >
+              <path 
+                fill="hsl(var(--secondary) / 0.1)" 
+                d="M0,50 C200,20 400,70 600,40 C800,10 1000,60 1200,30 L1440,50 L1440,80 L0,80 Z"
+              />
+            </svg>
+            
+            {/* Stats Cards - Floating Bubbles Style */}
+            <div className="relative grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              {statsData.map((stat, index) => {
+                const Icon = stat.icon;
+                const isActive = index === activeStatIndex;
+                
+                return (
+                  <div
+                    key={stat.label}
+                    className="group relative animate-fade-in"
+                    style={{ animationDelay: `${stat.delay}s` }}
+                  >
+                    {/* Bubble Background */}
+                    <div 
+                      className={`absolute inset-0 rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 blur-xl transition-all duration-700 ${
+                        isActive ? 'scale-110 opacity-80' : 'scale-100 opacity-40'
+                      }`}
+                    />
+                    
+                    {/* Card Content */}
+                    <div 
+                      className={`relative p-6 md:p-8 rounded-3xl backdrop-blur-md border transition-all duration-500 text-center overflow-hidden ${
+                        isActive 
+                          ? 'bg-primary/20 border-primary/40 scale-105 shadow-2xl shadow-primary/20' 
+                          : 'bg-card/30 border-primary-foreground/10 hover:bg-card/40 hover:scale-102'
+                      }`}
+                    >
+                      {/* Ripple Effect */}
+                      <div className={`absolute inset-0 rounded-3xl transition-opacity duration-500 ${
+                        isActive ? 'opacity-100' : 'opacity-0'
+                      }`}>
+                        <div className="absolute inset-0 animate-ripple rounded-3xl border-2 border-primary/30" />
+                        <div className="absolute inset-0 animate-ripple rounded-3xl border-2 border-primary/20" style={{ animationDelay: '0.5s' }} />
+                      </div>
+                      
+                      {/* Fish Icon Swimming */}
+                      <div className={`absolute -right-2 top-1/2 -translate-y-1/2 transition-all duration-700 ${
+                        isActive ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
+                      }`}>
+                        <svg className="w-8 h-8 text-primary/40 animate-swim" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.8-.1 2.6-.3-.4-1.2-.6-2.5-.6-3.7 0-3.5 1.5-6.7 3.9-9-.6-.6-1.3-1.1-2-1.5C14.8 4.5 13.4 2 12 2zm-1 4c.6 0 1 .4 1 1s-.4 1-1 1-1-.4-1-1 .4-1 1-1z"/>
+                        </svg>
+                      </div>
+                      
+                      {/* Icon */}
+                      <div className={`mx-auto mb-3 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${
+                        isActive 
+                          ? 'bg-primary text-primary-foreground scale-110' 
+                          : 'bg-primary/20 text-primary'
+                      }`}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      
+                      {/* Value */}
+                      <p className={`text-3xl md:text-4xl font-bold transition-all duration-500 ${
+                        isActive 
+                          ? 'text-primary-foreground scale-110' 
+                          : 'bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'
+                      }`}>
+                        {stat.value}
+                      </p>
+                      
+                      {/* Label */}
+                      <p className={`text-sm mt-1 transition-colors duration-500 ${
+                        isActive ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                      }`}>
+                        {stat.label}
+                      </p>
+                      
+                      {/* Water Level Animation */}
+                      <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-primary transition-all duration-700 ${
+                        isActive ? 'opacity-100' : 'opacity-0'
+                      }`}>
+                        <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* CSS Animations */}
-      <style>{`
-        @keyframes swim {
-          0% { transform: translateX(0) translateY(0); }
-          50% { transform: translateX(50vw) translateY(-20px); }
-          100% { transform: translateX(110vw) translateY(0); }
-        }
-
-        @keyframes bob {
-          0%, 100% { transform: translateY(0px) rotate(-2deg); }
-          50% { transform: translateY(-15px) rotate(2deg); }
-        }
-
-        @keyframes cast {
-          0%, 100% { transform: rotate(0deg) translateX(0); }
-          50% { transform: rotate(-30deg) translateX(10px); }
-        }
-
-        @keyframes drive {
-          0%, 100% { transform: translateX(0); }
-          50% { transform: translateX(-30px); }
-        }
-
-        @keyframes wave-hand {
-          0%, 100% { transform: rotate(0deg); }
-          25% { transform: rotate(20deg); }
-          75% { transform: rotate(-20deg); }
-        }
-
-        @keyframes dash {
-          to { stroke-dashoffset: -100; }
-        }
-
-        @keyframes wave {
-          0%, 100% { d: path("M0,160 Q120,200 240,160 T480,160 L480,320 L0,320 Z"); }
-          50% { d: path("M0,180 Q120,160 240,180 T480,180 L480,320 L0,320 Z"); }
-        }
-      `}</style>
+      {/* Scroll Indicator - More visible with proper spacing */}
+      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3">
+        <span className="text-sm font-medium text-primary-foreground/80 tracking-wide uppercase">
+          Scroll to explore
+        </span>
+        <div className="relative w-8 h-14 rounded-full border-2 border-primary-foreground/40 flex justify-center p-2 backdrop-blur-sm bg-card/20">
+          <div className="w-2 h-4 rounded-full bg-primary animate-scroll-down" />
+          {/* Ripple rings */}
+          <div className="absolute -inset-2 rounded-full border border-primary-foreground/20 animate-ping-slow" />
+        </div>
+      </div>
     </section>
   );
 };
