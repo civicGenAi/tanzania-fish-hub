@@ -66,6 +66,11 @@ import Products from "./pages/admin/Products";
 import AuditTrails from "./pages/admin/AuditTrails";
 import UserManagement from "./pages/admin/UserManagement";
 import Settings from "./pages/admin/Settings";
+import Logistics from "./pages/admin/Logistics";
+import Regions from "./pages/admin/Regions";
+import Reviews from "./pages/admin/Reviews";
+import Reports from "./pages/admin/Reports";
+import Messages from "./pages/admin/Messages";
 
 const queryClient = new QueryClient();
 
@@ -136,8 +141,13 @@ const App = () => (
                 <Route path="sales" element={<Sales />} />
                 <Route path="customers" element={<Customers />} />
                 <Route path="products" element={<Products />} />
+                <Route path="logistics" element={<Logistics />} />
+                <Route path="regions" element={<Regions />} />
+                <Route path="reviews" element={<Reviews />} />
+                <Route path="reports" element={<Reports />} />
                 <Route path="audit" element={<AuditTrails />} />
                 <Route path="users" element={<UserManagement />} />
+                <Route path="messages" element={<Messages />} />
                 <Route path="settings" element={<Settings />} />
               </Route>
 
