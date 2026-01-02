@@ -187,15 +187,44 @@
   }
 
   .animate-slide-up {
-    animation: slideUp 0.5s ease-out forwards;
+    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   .animate-fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
+    animation: fadeIn 0.6s ease-out forwards;
   }
 
   .animate-scale-in {
-    animation: scaleIn 0.3s ease-out forwards;
+    animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-wave-slow {
+    animation: waveMove 8s ease-in-out infinite;
+  }
+
+  .animate-wave-medium {
+    animation: waveMove 6s ease-in-out infinite reverse;
+  }
+
+  .animate-wave-fast {
+    animation: waveMove 4s ease-in-out infinite;
+  }
+
+  .animate-float-particle {
+    animation: floatParticle 10s ease-in-out infinite;
+  }
+
+  .animate-scroll-down {
+    animation: scrollDown 2s ease-in-out infinite;
+  }
+
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradientShift 4s ease infinite;
+  }
+
+  .bg-gradient-radial {
+    background: radial-gradient(circle, var(--tw-gradient-from), var(--tw-gradient-to));
   }
 }
 
@@ -209,10 +238,50 @@
   50% { transform: translateX(10px); }
 }
 
+@keyframes waveMove {
+  0%, 100% { transform: translateX(-5%) scaleY(1); }
+  50% { transform: translateX(5%) scaleY(1.1); }
+}
+
+@keyframes floatParticle {
+  0%, 100% { 
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.3;
+  }
+  25% { 
+    transform: translateY(-30px) translateX(10px) scale(1.2);
+    opacity: 0.6;
+  }
+  50% { 
+    transform: translateY(-50px) translateX(-5px) scale(0.8);
+    opacity: 0.4;
+  }
+  75% { 
+    transform: translateY(-20px) translateX(15px) scale(1.1);
+    opacity: 0.5;
+  }
+}
+
+@keyframes scrollDown {
+  0%, 100% { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% { 
+    transform: translateY(8px);
+    opacity: 0.3;
+  }
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
 @keyframes slideUp {
   from { 
     opacity: 0; 
-    transform: translateY(20px); 
+    transform: translateY(30px); 
   }
   to { 
     opacity: 1; 
@@ -228,7 +297,7 @@
 @keyframes scaleIn {
   from { 
     opacity: 0; 
-    transform: scale(0.95); 
+    transform: scale(0.9); 
   }
   to { 
     opacity: 1; 
