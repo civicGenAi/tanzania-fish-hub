@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Volume2, VolumeX, Anchor, Ship, Truck, Users } from 'lucide-react';
 
 // Ocean video from Pexels CDN
