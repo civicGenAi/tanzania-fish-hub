@@ -17,7 +17,6 @@ import BlogPost from "./pages/BlogPost";
 import Dashboard from "./pages/Dashboard";
 import SellerDashboard from "./pages/SellerDashboard";
 import DistributorDashboard from "./pages/DistributorDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 // Customer pages
@@ -55,6 +54,18 @@ import DistributorCompleted from "./pages/distributor/DistributorCompleted";
 import DistributorHistory from "./pages/distributor/DistributorHistory";
 import DistributorSupport from "./pages/distributor/DistributorSupport";
 import DistributorNotifications from "./pages/distributor/DistributorNotifications";
+
+// Admin pages
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import Overview from "./pages/admin/Overview";
+import Analytics from "./pages/admin/Analytics";
+import Orders from "./pages/admin/Orders";
+import Sales from "./pages/admin/Sales";
+import Customers from "./pages/admin/Customers";
+import Products from "./pages/admin/Products";
+import AuditTrails from "./pages/admin/AuditTrails";
+import UserManagement from "./pages/admin/UserManagement";
+import Settings from "./pages/admin/Settings";
 
 const queryClient = new QueryClient();
 
@@ -117,8 +128,18 @@ const App = () => (
               <Route path="/distributor/notifications" element={<DistributorNotifications />} />
               <Route path="/distributor/settings" element={<DistributorSettings />} />
 
-              {/* Admin Dashboard Route */}
-              <Route path="/admin" element={<AdminDashboard />} />
+              {/* Admin Dashboard Routes */}
+              <Route path="/admin" element={<AdminDashboard />}>
+                <Route index element={<Overview />} />
+                <Route path="analytics" element={<Analytics />} />
+                <Route path="orders" element={<Orders />} />
+                <Route path="sales" element={<Sales />} />
+                <Route path="customers" element={<Customers />} />
+                <Route path="products" element={<Products />} />
+                <Route path="audit" element={<AuditTrails />} />
+                <Route path="users" element={<UserManagement />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
 
               <Route path="*" element={<NotFound />} />
             </Routes>
