@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Volume2, VolumeX, Anchor, Ship, Truck, Users } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React, { useState, useRef } from 'react';
+import { Volume2, VolumeX, Anchor, Ship, Truck, Users } from 'lucide-react';
 
 // Ocean video from Pexels CDN
 const OCEAN_VIDEO_URL = "https://videos.pexels.com/video-files/1093662/1093662-uhd_2560_1440_30fps.mp4";
@@ -98,21 +96,6 @@ const HeroSection: React.FC = () => {
               To Your Table
             </span>
           </h1>
-          
-          {/* CTA Buttons */}
-          <div className="flex flex-wrap justify-center gap-4 mt-10">
-            <Link to="/marketplace">
-              <Button size="lg" className="group px-8 py-6 text-lg rounded-full shadow-2xl hover:shadow-primary/30 transition-all duration-300 bg-primary hover:bg-primary/90">
-                Explore Marketplace
-                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </Link>
-            <Link to="/sell">
-              <Button variant="outline" size="lg" className="px-8 py-6 text-lg rounded-full border-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 backdrop-blur-sm">
-                Start Selling
-              </Button>
-            </Link>
-          </div>
         </div>
 
         {/* Aquatic Stats Display */}
