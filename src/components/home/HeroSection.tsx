@@ -1,61 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Truck, Shield, Anchor, Ship, Store, ChefHat, Users, MapPin, Clock, CheckCircle2, Volume2, VolumeX } from 'lucide-react';
+import { ArrowRight, Volume2, VolumeX, Anchor, Ship, Truck, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { stats } from '@/data/fishData';
 
 // Ocean video from Pexels CDN
 const OCEAN_VIDEO_URL = "https://videos.pexels.com/video-files/1093662/1093662-uhd_2560_1440_30fps.mp4";
 
-const ecosystemSteps = [
-  {
-    id: 1,
-    icon: Anchor,
-    title: 'Ocean Catch',
-    description: 'Local fishermen bring in fresh catches daily',
-    image: 'https://images.unsplash.com/photo-1545816250-e12bedba42ba?w=400&h=300&fit=crop',
-  },
-  {
-    id: 2,
-    icon: Ship,
-    title: 'Quality Check',
-    description: 'Blockchain-verified freshness & traceability',
-    image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=400&h=300&fit=crop',
-  },
-  {
-    id: 3,
-    icon: Store,
-    title: 'Marketplace',
-    description: 'Browse & order from verified sellers',
-    image: 'https://images.unsplash.com/photo-1534766555764-ce878a5e3a2b?w=400&h=300&fit=crop',
-  },
-  {
-    id: 4,
-    icon: Truck,
-    title: 'Swift Delivery',
-    description: 'Cold-chain logistics to your doorstep',
-    image: 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=400&h=300&fit=crop',
-  },
-  {
-    id: 5,
-    icon: ChefHat,
-    title: 'Fresh to Table',
-    description: 'Enjoy premium quality seafood',
-    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop',
-  },
+const statsData = [
+  { value: '2.5K+', label: 'Fishermen', icon: Anchor, delay: 0 },
+  { value: '50K+', label: 'Orders Delivered', icon: Ship, delay: 0.2 },
+  { value: '98%', label: 'Satisfaction', icon: Users, delay: 0.4 },
+  { value: '5+', label: 'Regions', icon: Truck, delay: 0.6 },
 ];
 
 const HeroSection: React.FC = () => {
-  const [activeStep, setActiveStep] = useState(0);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [activeStatIndex, setActiveStatIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveStep((prev) => (prev + 1) % ecosystemSteps.length);
-    }, 4000);
-
+      setActiveStatIndex((prev) => (prev + 1) % statsData.length);
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -67,7 +34,7 @@ const HeroSection: React.FC = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Video Background */}
       <div className="absolute inset-0 z-0">
         <video
@@ -85,8 +52,8 @@ const HeroSection: React.FC = () => {
         </video>
         
         {/* Video Overlay Gradients */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/50 to-background/90" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-background/60" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/40 to-background/95" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/50 via-transparent to-background/50" />
         
         {/* Fallback gradient while video loads */}
         <div className={`absolute inset-0 bg-gradient-to-b from-primary/20 via-background to-background transition-opacity duration-1000 ${
@@ -97,239 +64,176 @@ const HeroSection: React.FC = () => {
       {/* Mute/Unmute Button */}
       <button
         onClick={toggleMute}
-        className="absolute bottom-24 right-6 z-20 p-3 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 text-foreground hover:bg-card transition-all duration-300 shadow-lg"
+        className="absolute top-24 right-6 z-20 p-3 rounded-full bg-card/60 backdrop-blur-md border border-primary-foreground/20 text-primary-foreground hover:bg-card/80 transition-all duration-300 shadow-lg"
         aria-label={isMuted ? 'Unmute video' : 'Mute video'}
       >
         {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
       </button>
 
-      {/* Subtle Floating Particles over video */}
+      {/* Bubbles Animation */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-[1]">
-        {[...Array(15)].map((_, i) => (
+        {[...Array(20)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1.5 h-1.5 rounded-full bg-primary-foreground/30 animate-float-particle"
+            className="absolute rounded-full bg-primary-foreground/20 animate-bubble"
             style={{
               left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${8 + Math.random() * 4}s`,
+              bottom: '-20px',
+              width: `${4 + Math.random() * 12}px`,
+              height: `${4 + Math.random() * 12}px`,
+              animationDelay: `${Math.random() * 8}s`,
+              animationDuration: `${6 + Math.random() * 6}s`,
             }}
           />
         ))}
       </div>
 
-      <div className="container relative z-10 py-12">
-        {/* Main Content */}
-        <div className="text-center max-w-4xl mx-auto mb-16 animate-slide-up">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-card/80 backdrop-blur-sm border border-primary/20 shadow-lg mb-8">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary"></span>
-            </span>
-            <span className="text-sm font-medium">
-              Serving <span className="text-primary font-bold">{stats.regionsServed}+ regions</span> across Tanzania
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6">
-            <span className="block text-foreground">From Ocean</span>
-            <span className="block bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent animate-gradient">
+      {/* Main Content */}
+      <div className="container relative z-10 flex flex-col items-center justify-center min-h-screen py-20">
+        {/* Centered Headline */}
+        <div className="text-center mb-16 animate-slide-up">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-none tracking-tight">
+            <span className="block text-primary-foreground drop-shadow-lg mb-2">From Ocean</span>
+            <span className="block bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent animate-gradient drop-shadow-lg">
               To Your Table
             </span>
           </h1>
           
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-            Experience Tanzania's premier fish marketplace. We connect local fishermen directly with hotels, 
-            restaurants, and households — ensuring <span className="text-foreground font-semibold">freshness you can trust</span>.
-          </p>
-
           {/* CTA Buttons */}
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
+          <div className="flex flex-wrap justify-center gap-4 mt-10">
             <Link to="/marketplace">
-              <Button size="lg" className="group px-8 py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-primary hover:bg-primary/90">
+              <Button size="lg" className="group px-8 py-6 text-lg rounded-full shadow-2xl hover:shadow-primary/30 transition-all duration-300 bg-primary hover:bg-primary/90">
                 Explore Marketplace
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
             <Link to="/sell">
-              <Button variant="outline" size="lg" className="px-8 py-6 text-lg rounded-full border-2 hover:bg-card/50">
+              <Button variant="outline" size="lg" className="px-8 py-6 text-lg rounded-full border-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 backdrop-blur-sm">
                 Start Selling
               </Button>
             </Link>
           </div>
-
-          {/* Trust Badges */}
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-secondary" />
-              <span>Blockchain Verified</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-primary" />
-              <span>Same Day Delivery</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-secondary" />
-              <span>Quality Guaranteed</span>
-            </div>
-          </div>
         </div>
 
-        {/* Cinematic Ecosystem Visualization */}
-        <div className="relative max-w-6xl mx-auto">
-          {/* Journey Line */}
-          <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-primary/20 via-secondary/40 to-primary/20 -translate-y-1/2 rounded-full" />
-          
-          {/* Progress Line */}
-          <div 
-            className="hidden lg:block absolute top-1/2 left-0 h-1 bg-gradient-to-r from-primary to-secondary -translate-y-1/2 rounded-full transition-all duration-1000 ease-out"
-            style={{ width: `${(activeStep / (ecosystemSteps.length - 1)) * 100}%` }}
-          />
-
-          {/* Steps */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6">
-            {ecosystemSteps.map((step, index) => {
-              const Icon = step.icon;
-              const isActive = index === activeStep;
-              const isPast = index < activeStep;
-              
-              return (
-                <div
-                  key={step.id}
-                  className={`relative group cursor-pointer transition-all duration-500 ${
-                    isActive ? 'scale-105 z-10' : 'scale-100'
-                  }`}
-                  onClick={() => setActiveStep(index)}
-                >
-                  {/* Card */}
-                  <div 
-                    className={`relative rounded-2xl overflow-hidden transition-all duration-500 ${
-                      isActive 
-                        ? 'shadow-2xl ring-2 ring-primary/50' 
-                        : 'shadow-lg hover:shadow-xl'
-                    }`}
+        {/* Aquatic Stats Display */}
+        <div className="w-full max-w-5xl mx-auto mt-auto">
+          {/* Wave Container */}
+          <div className="relative">
+            {/* Animated Wave SVG */}
+            <svg 
+              className="absolute -top-16 left-0 w-full h-20 animate-wave-slow" 
+              viewBox="0 0 1440 80" 
+              preserveAspectRatio="none"
+            >
+              <path 
+                fill="hsl(var(--primary) / 0.15)" 
+                d="M0,40 C150,80 300,0 450,40 C600,80 750,0 900,40 C1050,80 1200,0 1350,40 L1440,40 L1440,80 L0,80 Z"
+              />
+            </svg>
+            <svg 
+              className="absolute -top-12 left-0 w-full h-16 animate-wave-medium" 
+              viewBox="0 0 1440 80" 
+              preserveAspectRatio="none"
+            >
+              <path 
+                fill="hsl(var(--secondary) / 0.1)" 
+                d="M0,50 C200,20 400,70 600,40 C800,10 1000,60 1200,30 L1440,50 L1440,80 L0,80 Z"
+              />
+            </svg>
+            
+            {/* Stats Cards - Floating Bubbles Style */}
+            <div className="relative grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              {statsData.map((stat, index) => {
+                const Icon = stat.icon;
+                const isActive = index === activeStatIndex;
+                
+                return (
+                  <div
+                    key={stat.label}
+                    className="group relative animate-fade-in"
+                    style={{ animationDelay: `${stat.delay}s` }}
                   >
-                    {/* Image */}
-                    <div className="relative h-36 md:h-44 overflow-hidden">
-                      <img
-                        src={step.image}
-                        alt={step.title}
-                        className={`w-full h-full object-cover transition-all duration-700 ${
-                          isActive ? 'scale-110' : 'scale-100 group-hover:scale-105'
-                        }`}
-                      />
-                      <div className={`absolute inset-0 transition-all duration-500 ${
+                    {/* Bubble Background */}
+                    <div 
+                      className={`absolute inset-0 rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 blur-xl transition-all duration-700 ${
+                        isActive ? 'scale-110 opacity-80' : 'scale-100 opacity-40'
+                      }`}
+                    />
+                    
+                    {/* Card Content */}
+                    <div 
+                      className={`relative p-6 md:p-8 rounded-3xl backdrop-blur-md border transition-all duration-500 text-center overflow-hidden ${
                         isActive 
-                          ? 'bg-gradient-to-t from-primary/80 via-primary/40 to-transparent' 
-                          : isPast
-                            ? 'bg-gradient-to-t from-secondary/70 via-secondary/30 to-transparent'
-                            : 'bg-gradient-to-t from-foreground/70 via-foreground/30 to-transparent'
-                      }`} />
+                          ? 'bg-primary/20 border-primary/40 scale-105 shadow-2xl shadow-primary/20' 
+                          : 'bg-card/30 border-primary-foreground/10 hover:bg-card/40 hover:scale-102'
+                      }`}
+                    >
+                      {/* Ripple Effect */}
+                      <div className={`absolute inset-0 rounded-3xl transition-opacity duration-500 ${
+                        isActive ? 'opacity-100' : 'opacity-0'
+                      }`}>
+                        <div className="absolute inset-0 animate-ripple rounded-3xl border-2 border-primary/30" />
+                        <div className="absolute inset-0 animate-ripple rounded-3xl border-2 border-primary/20" style={{ animationDelay: '0.5s' }} />
+                      </div>
                       
-                      {/* Step Number */}
-                      <div className={`absolute top-3 left-3 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
+                      {/* Fish Icon Swimming */}
+                      <div className={`absolute -right-2 top-1/2 -translate-y-1/2 transition-all duration-700 ${
+                        isActive ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
+                      }`}>
+                        <svg className="w-8 h-8 text-primary/40 animate-swim" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.8-.1 2.6-.3-.4-1.2-.6-2.5-.6-3.7 0-3.5 1.5-6.7 3.9-9-.6-.6-1.3-1.1-2-1.5C14.8 4.5 13.4 2 12 2zm-1 4c.6 0 1 .4 1 1s-.4 1-1 1-1-.4-1-1 .4-1 1-1z"/>
+                        </svg>
+                      </div>
+                      
+                      {/* Icon */}
+                      <div className={`mx-auto mb-3 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${
                         isActive 
                           ? 'bg-primary text-primary-foreground scale-110' 
-                          : isPast
-                            ? 'bg-secondary text-secondary-foreground'
-                            : 'bg-card/80 text-foreground'
-                      }`}>
-                        {index + 1}
-                      </div>
-
-                      {/* Icon Badge */}
-                      <div className={`absolute top-3 right-3 p-2 rounded-xl transition-all duration-300 ${
-                        isActive 
-                          ? 'bg-primary-foreground/90 text-primary' 
-                          : 'bg-card/80 text-foreground'
+                          : 'bg-primary/20 text-primary'
                       }`}>
                         <Icon className="h-5 w-5" />
                       </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-4 bg-card/95 backdrop-blur-sm">
-                      <h3 className={`font-bold text-sm md:text-base mb-1 transition-colors duration-300 ${
-                        isActive ? 'text-primary' : 'text-foreground'
+                      
+                      {/* Value */}
+                      <p className={`text-3xl md:text-4xl font-bold transition-all duration-500 ${
+                        isActive 
+                          ? 'text-primary-foreground scale-110' 
+                          : 'bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'
                       }`}>
-                        {step.title}
-                      </h3>
-                      <p className="text-xs text-muted-foreground line-clamp-2">
-                        {step.description}
+                        {stat.value}
                       </p>
+                      
+                      {/* Label */}
+                      <p className={`text-sm mt-1 transition-colors duration-500 ${
+                        isActive ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                      }`}>
+                        {stat.label}
+                      </p>
+                      
+                      {/* Water Level Animation */}
+                      <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-primary transition-all duration-700 ${
+                        isActive ? 'opacity-100' : 'opacity-0'
+                      }`}>
+                        <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+                      </div>
                     </div>
-
-                    {/* Active Indicator */}
-                    {isActive && (
-                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-secondary animate-pulse" />
-                    )}
                   </div>
-
-                  {/* Connection Line Dot (Desktop) */}
-                  <div className={`hidden lg:block absolute -bottom-8 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border-4 transition-all duration-500 ${
-                    isActive 
-                      ? 'bg-primary border-primary scale-125' 
-                      : isPast 
-                        ? 'bg-secondary border-secondary' 
-                        : 'bg-card border-muted'
-                  }`} />
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-
-          {/* Mobile Step Indicator */}
-          <div className="flex lg:hidden justify-center gap-2 mt-8">
-            {ecosystemSteps.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setActiveStep(index)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                  index === activeStep 
-                    ? 'bg-primary w-8' 
-                    : index < activeStep 
-                      ? 'bg-secondary' 
-                      : 'bg-muted'
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Stats Section */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 max-w-4xl mx-auto">
-          {[
-            { value: `${(stats.fishermen / 1000).toFixed(1)}K+`, label: 'Fishermen', icon: Users },
-            { value: `${(stats.ordersDelivered / 1000).toFixed(0)}K+`, label: 'Orders Delivered', icon: Truck },
-            { value: `${stats.satisfactionRate}%`, label: 'Satisfaction', icon: CheckCircle2 },
-            { value: `${stats.regionsServed}+`, label: 'Regions', icon: MapPin },
-          ].map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <div 
-                key={stat.label} 
-                className="relative group p-6 rounded-2xl bg-card/60 backdrop-blur-sm border border-border/50 text-center hover:bg-card/80 transition-all duration-300 hover:shadow-lg animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <Icon className="h-6 w-6 mx-auto mb-3 text-primary group-hover:scale-110 transition-transform duration-300" />
-                <p className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  {stat.value}
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
-              </div>
-            );
-          })}
         </div>
       </div>
 
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce">
-        <span className="text-xs text-muted-foreground">Scroll to explore</span>
-        <div className="w-6 h-10 rounded-full border-2 border-muted-foreground/30 flex justify-center pt-2">
-          <div className="w-1.5 h-3 rounded-full bg-primary animate-scroll-down" />
+      {/* Scroll Indicator - More visible with proper spacing */}
+      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3">
+        <span className="text-sm font-medium text-primary-foreground/80 tracking-wide uppercase">
+          Scroll to explore
+        </span>
+        <div className="relative w-8 h-14 rounded-full border-2 border-primary-foreground/40 flex justify-center p-2 backdrop-blur-sm bg-card/20">
+          <div className="w-2 h-4 rounded-full bg-primary animate-scroll-down" />
+          {/* Ripple rings */}
+          <div className="absolute -inset-2 rounded-full border border-primary-foreground/20 animate-ping-slow" />
         </div>
       </div>
     </section>
