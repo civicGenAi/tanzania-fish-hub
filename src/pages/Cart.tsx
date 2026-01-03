@@ -78,7 +78,7 @@ const CartPage: React.FC = () => {
                 >
                   <Link to={`/fish/${item.product.id}`} className="shrink-0">
                     <img
-                      src={item.product.image_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400'}
+                      src={item.product.images?.[0] || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400'}
                       alt={item.product.name}
                       className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-xl"
                     />

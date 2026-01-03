@@ -159,12 +159,12 @@ const SellerDashboard: React.FC = () => {
                 {activeTab === 'products' && (
                   <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {myProducts.map((product) => {
-                      const inStock = product.status === 'active' && product.stock_quantity > 0;
+                      const inStock = product.status === 'active' && product.stock > 0;
                       return (
                         <div key={product.id} className="bg-muted/30 border border-border/50 rounded-xl overflow-hidden group">
                           <div className="relative">
                             <img
-                              src={product.image_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400'}
+                              src={product.images?.[0] || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400'}
                               alt={product.name}
                               className="w-full h-36 object-cover"
                             />

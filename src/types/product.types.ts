@@ -8,13 +8,15 @@ export interface Product {
   seller_id: string;
   category_id: string;
   name: string;
+  slug: string;
+  sku: string;
   description: string | null;
   price: number;
   status: ProductStatus;
   stock: number;
   unit: ProductUnit;
   min_order_quantity: number;
-  image_url: string | null;
+  images: string[];
   created_at: string;
   updated_at: string;
 }
@@ -52,24 +54,28 @@ export interface ProductImage {
 export interface CreateProductData {
   category_id: string;
   name: string;
+  slug: string;
+  sku: string;
   description?: string;
   price: number;
   stock: number;
   unit: ProductUnit;
   min_order_quantity?: number;
-  image_url?: string;
+  images?: string[];
 }
 
 export interface UpdateProductData {
   category_id?: string;
   name?: string;
+  slug?: string;
+  sku?: string;
   description?: string;
   price?: number;
   status?: ProductStatus;
   stock?: number;
   unit?: ProductUnit;
   min_order_quantity?: number;
-  image_url?: string;
+  images?: string[];
 }
 
 export interface ProductFilters {

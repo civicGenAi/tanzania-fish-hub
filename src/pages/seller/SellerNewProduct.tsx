@@ -158,16 +158,22 @@ const SellerNewProduct: React.FC = () => {
         }
       }
 
+      // Generate slug and SKU
+      const slug = formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const sku = `${slug}-${Date.now()}`.toUpperCase();
+
       // Create product
       const product = await productsService.createProduct(sellerId, {
         name: formData.name,
+        slug,
+        sku,
         description: formData.description || undefined,
         category_id: formData.category_id,
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
         unit: formData.unit,
         min_order_quantity: parseInt(formData.min_order_quantity),
-        image_url: imageUrl,
+        images: imageUrl ? [imageUrl] : [],
       });
 
       toast({

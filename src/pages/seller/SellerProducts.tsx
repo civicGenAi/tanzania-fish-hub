@@ -199,11 +199,11 @@ const SellerProducts: React.FC = () => {
                   <div className="absolute bottom-2 left-2">
                     <span className={cn(
                       "px-2 py-1 rounded-full text-xs font-medium",
-                      product.status === 'active' && product.stock_quantity > 0
+                      product.status === 'active' && product.stock > 0
                         ? 'bg-secondary text-secondary-foreground'
                         : 'bg-muted text-muted-foreground'
                     )}>
-                      {product.stock_quantity > 0 ? 'In Stock' : 'Out of Stock'}
+                      {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
                     </span>
                   </div>
                 </div>
