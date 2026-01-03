@@ -121,13 +121,13 @@ const FishDetailPage: React.FC = () => {
             <div className="space-y-4">
               <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-muted">
                 <img
-                  src={product.image_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=800'}
+                  src={product.images?.[0] || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=800'}
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
                 {/* Badges */}
                 <div className="absolute top-4 left-4 flex gap-2">
-                  {product.status === 'active' && product.stock_quantity > 0 ? (
+                  {product.status === 'active' && product.stock > 0 ? (
                     <span className="px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-sm font-medium flex items-center gap-1">
                       <Check className="h-3 w-3" />
                       In Stock
@@ -209,7 +209,7 @@ const FishDetailPage: React.FC = () => {
                   <span className="text-muted-foreground">per {product.unit}</span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {product.stock_quantity} {product.unit} available
+                  {product.stock} {product.unit} available
                 </p>
               </div>
 
@@ -241,7 +241,7 @@ const FishDetailPage: React.FC = () => {
                   </div>
                   <div className="bg-muted rounded-xl p-4">
                     <p className="text-sm text-muted-foreground">Stock</p>
-                    <p className="font-semibold">{product.stock_quantity} {product.unit}</p>
+                    <p className="font-semibold">{product.stock} {product.unit}</p>
                   </div>
                 </div>
               </div>
@@ -262,7 +262,7 @@ const FishDetailPage: React.FC = () => {
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => setQuantity(Math.min(product.stock_quantity, quantity + 1))}
+                      onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
@@ -278,7 +278,7 @@ const FishDetailPage: React.FC = () => {
                     size="lg"
                     className="flex-1"
                     onClick={handleAddToCart}
-                    disabled={product.status !== 'active' || product.stock_quantity === 0}
+                    disabled={product.status !== 'active' || product.stock === 0}
                   >
                     <ShoppingCart className="h-5 w-5" />
                     {isInCart(product.id) ? 'Add More' : 'Add to Cart'}
@@ -286,7 +286,7 @@ const FishDetailPage: React.FC = () => {
                   <Button
                     variant="outline"
                     size="lg"
-                    disabled={product.status !== 'active' || product.stock_quantity === 0}
+                    disabled={product.status !== 'active' || product.stock === 0}
                   >
                     Buy Now
                   </Button>
@@ -348,11 +348,11 @@ const FishDetailPage: React.FC = () => {
                 >
                   <div className="relative aspect-video overflow-hidden">
                     <img
-                      src={relatedProduct.image_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400'}
+                      src={relatedProduct.images?.[0] || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400'}
                       alt={relatedProduct.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
-                    {relatedProduct.stock_quantity > 0 && (
+                    {relatedProduct.stock > 0 && (
                       <div className="absolute top-2 right-2 px-2 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-medium">
                         In Stock
                       </div>

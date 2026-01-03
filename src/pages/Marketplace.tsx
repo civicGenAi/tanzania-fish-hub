@@ -147,11 +147,11 @@ const MarketplacePage: React.FC = () => {
                       <div className="bg-card border border-border rounded-2xl overflow-hidden hover:shadow-ocean transition-all group">
                         <div className="relative aspect-video overflow-hidden">
                           <img
-                            src={product.image_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400'}
+                            src={product.images?.[0] || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400'}
                             alt={product.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                           />
-                          {product.stock_quantity > 0 && (
+                          {product.stock > 0 && (
                             <div className="absolute top-2 right-2 px-2 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-medium">
                               In Stock
                             </div>
