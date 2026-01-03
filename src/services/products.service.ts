@@ -31,11 +31,11 @@ class ProductsService {
       }
 
       if (filters?.min_price) {
-        query = query.gte('base_price', filters.min_price);
+        query = query.gte('price', filters.min_price);
       }
 
       if (filters?.max_price) {
-        query = query.lte('base_price', filters.max_price);
+        query = query.lte('price', filters.max_price);
       }
 
       if (filters?.search) {
@@ -43,7 +43,7 @@ class ProductsService {
       }
 
       if (filters?.in_stock) {
-        query = query.gt('stock_quantity', 0);
+        query = query.gt('stock', 0);
       }
 
       const { data, error } = await query;
@@ -155,7 +155,7 @@ class ProductsService {
     try {
       const { data, error } = await supabase
         .from('products')
-        .update({ stock_quantity: quantity })
+        .update({ stock: quantity })
         .eq('id', productId)
         .select()
         .single();
@@ -252,7 +252,7 @@ class ProductsService {
         .select('*')
         .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
         .eq('status', 'active')
-        .gt('stock_quantity', 0)
+        .gt('stock', 0)
         .limit(20);
 
       if (error) throw error;

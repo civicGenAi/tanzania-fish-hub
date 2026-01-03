@@ -200,7 +200,7 @@ const SellerDashboard: React.FC = () => {
                                 {inStock ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                               </button>
                             </div>
-                            <p className="font-bold text-primary">{formatPrice(product.base_price)}/{product.unit}</p>
+                            <p className="font-bold text-primary">{formatPrice(product.price)}/{product.unit}</p>
                           </div>
                         </div>
                       );

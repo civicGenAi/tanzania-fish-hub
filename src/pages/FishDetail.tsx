@@ -204,7 +204,7 @@ const FishDetailPage: React.FC = () => {
               <div className="bg-ocean-light rounded-2xl p-6">
                 <div className="flex items-baseline gap-2 mb-2">
                   <span className="text-4xl font-bold text-primary">
-                    {formatPrice(product.base_price)}
+                    {formatPrice(product.price)}
                   </span>
                   <span className="text-muted-foreground">per {product.unit}</span>
                 </div>
@@ -268,7 +268,7 @@ const FishDetailPage: React.FC = () => {
                     </Button>
                   </div>
                   <span className="text-muted-foreground ml-auto">
-                    Total: <span className="font-bold text-foreground">{formatPrice(product.base_price * quantity)}</span>
+                    Total: <span className="font-bold text-foreground">{formatPrice(product.price * quantity)}</span>
                   </span>
                 </div>
 
@@ -369,7 +369,7 @@ const FishDetailPage: React.FC = () => {
                     )}
                     <div className="flex items-center justify-between">
                       <p className="font-bold text-primary">
-                        {formatPrice(relatedProduct.base_price)}/{relatedProduct.unit}
+                        {formatPrice(relatedProduct.price)}/{relatedProduct.unit}
                       </p>
                     </div>
                   </div>
