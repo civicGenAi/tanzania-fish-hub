@@ -11,11 +11,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { formatTZS, stats as platformStats } from '@/data/fishData';
 
 const AdminDashboard: React.FC = () => {
-  const { logout } = useAuth();
+  const { signOut } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     navigate('/');
   };
 

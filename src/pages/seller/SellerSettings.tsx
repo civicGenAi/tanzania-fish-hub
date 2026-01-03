@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 
 const SellerSettings: React.FC = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   return (
     <DashboardLayout 
@@ -19,10 +19,10 @@ const SellerSettings: React.FC = () => {
         <div className="bg-card border border-border rounded-2xl p-6">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground text-2xl font-bold">
-              {user?.name?.charAt(0) || 'S'}
+              {profile?.full_name?.charAt(0) || 'S'}
             </div>
             <div>
-              <h2 className="text-xl font-semibold">{user?.name}</h2>
+              <h2 className="text-xl font-semibold">{profile?.full_name || 'Seller'}</h2>
               <p className="text-muted-foreground">{user?.email}</p>
             </div>
           </div>

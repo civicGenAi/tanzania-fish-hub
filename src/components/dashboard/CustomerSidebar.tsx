@@ -23,14 +23,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
 const CustomerSidebar: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     navigate('/');
   };
 
@@ -79,11 +79,11 @@ const CustomerSidebar: React.FC = () => {
             collapsed && "justify-center"
           )}>
             <div className="w-10 h-10 rounded-full ocean-gradient flex items-center justify-center text-primary-foreground font-bold shrink-0">
-              {user?.name?.charAt(0) || 'U'}
+              {profile?.full_name?.charAt(0) || 'U'}
             </div>
             {!collapsed && (
               <div className="min-w-0">
-                <p className="font-medium text-sm truncate">{user?.name || 'Customer'}</p>
+                <p className="font-medium text-sm truncate">{profile?.full_name || 'Customer'}</p>
                 <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
               </div>
             )}

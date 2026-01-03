@@ -8,11 +8,13 @@ import { cn } from '@/lib/utils';
 const MobileNav: React.FC = () => {
   const location = useLocation();
   const { totalItems } = useCart();
-  const { user, isAuthenticated } = useAuth();
+  const { user, profile } = useAuth();
+
+  const isAuthenticated = !!user;
 
   const getDashboardLink = () => {
-    if (!user) return '/login';
-    switch (user.role) {
+    if (!profile) return '/login';
+    switch (profile.user_type) {
       case 'seller':
         return '/seller';
       case 'distributor':

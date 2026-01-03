@@ -88,7 +88,7 @@ const SellerDashboard: React.FC = () => {
     <DashboardLayout 
       sidebar={<SellerSidebar />}
       title="Seller Dashboard"
-      subtitle={`Welcome back, ${user?.name || 'Seller'}`}
+      subtitle={`Welcome back, ${profile?.full_name || 'Seller'}`}
     >
       <div className="space-y-6">
         {/* Stats Grid */}

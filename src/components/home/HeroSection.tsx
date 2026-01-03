@@ -1,27 +1,34 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Volume2, VolumeX, Anchor, Ship, Truck, Users } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Volume2, VolumeX, Anchor, Ship, Truck, Users, Waves } from 'lucide-react';
 
-// Ocean video from Pexels CDN
 const OCEAN_VIDEO_URL = "https://videos.pexels.com/video-files/1093662/1093662-uhd_2560_1440_30fps.mp4";
 
 const statsData = [
-  { value: '2.5K+', label: 'Fishermen', icon: Anchor, delay: 0 },
-  { value: '50K+', label: 'Orders Delivered', icon: Ship, delay: 0.2 },
-  { value: '98%', label: 'Satisfaction', icon: Users, delay: 0.4 },
-  { value: '5+', label: 'Regions', icon: Truck, delay: 0.6 },
+  { value: '2.5K+', label: 'Fishermen', icon: Anchor, color: 'from-cyan-400 to-blue-600' },
+  { value: '50K+', label: 'Orders Delivered', icon: Ship, color: 'from-teal-400 to-emerald-600' },
+  { value: '98%', label: 'Satisfaction', icon: Users, color: 'from-blue-400 to-indigo-600' },
+  { value: '5+', label: 'Regions', icon: Truck, color: 'from-emerald-400 to-teal-600' },
 ];
 
 const HeroSection: React.FC = () => {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
-  const [activeStatIndex, setActiveStatIndex] = useState(0);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [hoveredStat, setHoveredStat] = useState<number | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveStatIndex((prev) => (prev + 1) % statsData.length);
-    }, 3000);
-    return () => clearInterval(interval);
+    setIsVisible(true);
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!heroRef.current) return;
+    const rect = heroRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    setMousePosition({ x, y });
   }, []);
 
   const toggleMute = () => {
@@ -32,9 +39,19 @@ const HeroSection: React.FC = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Video Background */}
-      <div className="absolute inset-0 z-0">
+    <section 
+      ref={heroRef}
+      onMouseMove={handleMouseMove}
+      className="relative min-h-screen flex items-center justify-center overflow-hidden cursor-default bg-slate-900"
+    >
+      {/* Video Background with Parallax */}
+      <div 
+        className="absolute inset-0 z-0 scale-110"
+        style={{
+          transform: `translate(${mousePosition.x * -20}px, ${mousePosition.y * -20}px) scale(1.1)`,
+          transition: 'transform 0.5s cubic-bezier(0.33, 1, 0.68, 1)',
+        }}
+      >
         <video
           ref={videoRef}
           autoPlay
@@ -49,174 +66,277 @@ const HeroSection: React.FC = () => {
           <source src={OCEAN_VIDEO_URL} type="video/mp4" />
         </video>
         
-        {/* Video Overlay Gradients */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/40 to-background/95" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background/50 via-transparent to-background/50" />
+        {/* Dark Overlay for Readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-secondary/20 mix-blend-overlay" />
         
-        {/* Fallback gradient while video loads */}
-        <div className={`absolute inset-0 bg-gradient-to-b from-primary/20 via-background to-background transition-opacity duration-1000 ${
-          isVideoLoaded ? 'opacity-0' : 'opacity-100'
-        }`} />
+        {/* Vignette Effect */}
+        <div className="absolute inset-0 bg-radial-vignette" />
       </div>
 
-      {/* Mute/Unmute Button */}
-      <button
-        onClick={toggleMute}
-        className="absolute top-24 right-6 z-20 p-3 rounded-full bg-card/60 backdrop-blur-md border border-primary-foreground/20 text-primary-foreground hover:bg-card/80 transition-all duration-300 shadow-lg"
-        aria-label={isMuted ? 'Unmute video' : 'Mute video'}
-      >
-        {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
-      </button>
-
-      {/* Bubbles Animation */}
+      {/* Animated Light Rays */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-[1]">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(5)].map((_, i) => (
           <div
-            key={i}
-            className="absolute rounded-full bg-primary-foreground/20 animate-bubble"
+            key={`ray-${i}`}
+            className="absolute top-0 h-full w-1 bg-gradient-to-b from-primary/30 via-primary/5 to-transparent animate-light-ray"
             style={{
-              left: `${Math.random() * 100}%`,
-              bottom: '-20px',
-              width: `${4 + Math.random() * 12}px`,
-              height: `${4 + Math.random() * 12}px`,
-              animationDelay: `${Math.random() * 8}s`,
-              animationDuration: `${6 + Math.random() * 6}s`,
+              left: `${15 + i * 20}%`,
+              animationDelay: `${i * 0.8}s`,
+              transform: `rotate(${-15 + i * 5}deg)`,
             }}
           />
         ))}
       </div>
 
+      {/* Floating Fish Silhouettes */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-[2]">
+        {[...Array(6)].map((_, i) => (
+          <div
+            key={`fish-${i}`}
+            className="absolute animate-fish-swim opacity-20"
+            style={{
+              top: `${20 + Math.random() * 60}%`,
+              left: `-10%`,
+              animationDelay: `${i * 3}s`,
+              animationDuration: `${15 + Math.random() * 10}s`,
+            }}
+          >
+            <svg 
+              className="w-12 h-8 md:w-16 md:h-10 text-primary-foreground" 
+              viewBox="0 0 64 40" 
+              fill="currentColor"
+              style={{ transform: `scale(${0.5 + Math.random() * 1})` }}
+            >
+              <ellipse cx="28" cy="20" rx="22" ry="14" />
+              <polygon points="50,20 64,8 64,32" />
+              <circle cx="16" cy="16" r="3" className="fill-background/50" />
+            </svg>
+          </div>
+        ))}
+      </div>
+
+      {/* Interactive Bubbles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-[3]">
+        {[...Array(25)].map((_, i) => (
+          <div
+            key={`bubble-${i}`}
+            className="absolute rounded-full border border-primary-foreground/30 animate-bubble-rise"
+            style={{
+              left: `${Math.random() * 100}%`,
+              bottom: '-5%',
+              width: `${8 + Math.random() * 24}px`,
+              height: `${8 + Math.random() * 24}px`,
+              animationDelay: `${Math.random() * 10}s`,
+              animationDuration: `${8 + Math.random() * 8}s`,
+              background: `radial-gradient(circle at 30% 30%, hsl(var(--primary-foreground) / 0.2), transparent)`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Mute Button */}
+      <button
+        onClick={toggleMute}
+        className="absolute top-24 right-6 z-20 p-3 rounded-full bg-card/40 backdrop-blur-xl border border-primary-foreground/20 text-primary-foreground hover:bg-card/60 hover:scale-110 transition-all duration-300 shadow-2xl group"
+        aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+      >
+        {isMuted ? <VolumeX className="h-5 w-5 group-hover:animate-pulse" /> : <Volume2 className="h-5 w-5" />}
+      </button>
+
       {/* Main Content */}
-      <div className="container relative z-10 flex flex-col items-center justify-center min-h-screen py-20">
-        {/* Centered Headline */}
-        <div className="text-center mb-16 animate-slide-up">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-none tracking-tight">
-            <span className="block text-primary-foreground drop-shadow-lg mb-2">From Ocean</span>
-            <span className="block bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent animate-gradient drop-shadow-lg">
-              To Your Table
+      <div className="container relative z-10 flex flex-col items-center justify-center min-h-screen py-20 px-4">
+        
+        {/* Animated Title with 3D Effect */}
+        <div 
+          className={`text-center mb-20 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}
+          style={{
+            transform: `perspective(1000px) rotateX(${mousePosition.y * 5}deg) rotateY(${mousePosition.x * -5}deg) translateY(${isVisible ? 0 : 20}px)`,
+            transition: 'transform 0.3s ease-out, opacity 1s ease-out',
+          }}
+        >
+          {/* Decorative Wave Lines */}
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <div className="h-px w-16 md:w-32 bg-gradient-to-r from-transparent to-primary-foreground/50" />
+            <Waves className="h-6 w-6 text-primary-foreground/70 animate-wave" />
+            <div className="h-px w-16 md:w-32 bg-gradient-to-l from-transparent to-primary-foreground/50" />
+          </div>
+
+          <h1 className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-bold leading-none tracking-tight">
+            <span 
+              className="block text-primary-foreground drop-shadow-2xl mb-2 animate-text-reveal"
+              style={{ animationDelay: '0.2s' }}
+            >
+              From Ocean
+            </span>
+            <span 
+              className="block relative animate-text-reveal"
+              style={{ animationDelay: '0.5s' }}
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent blur-2xl opacity-50">
+                To Your Table
+              </span>
+              <span className="relative bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient-flow">
+                To Your Table
+              </span>
             </span>
           </h1>
+
+          {/* Subtitle */}
+          <p 
+            className="mt-6 text-lg md:text-xl text-primary-foreground/70 max-w-2xl mx-auto animate-fade-in-delayed font-light tracking-wide"
+          >
+            Connecting fishermen directly to your kitchen — fresh, sustainable, traceable
+          </p>
         </div>
 
-        {/* Aquatic Stats Display */}
-        <div className="w-full max-w-5xl mx-auto mt-auto">
-          {/* Wave Container */}
-          <div className="relative">
-            {/* Animated Wave SVG */}
-            <svg 
-              className="absolute -top-16 left-0 w-full h-20 animate-wave-slow" 
-              viewBox="0 0 1440 80" 
-              preserveAspectRatio="none"
-            >
-              <path 
-                fill="hsl(var(--primary) / 0.15)" 
-                d="M0,40 C150,80 300,0 450,40 C600,80 750,0 900,40 C1050,80 1200,0 1350,40 L1440,40 L1440,80 L0,80 Z"
-              />
-            </svg>
-            <svg 
-              className="absolute -top-12 left-0 w-full h-16 animate-wave-medium" 
-              viewBox="0 0 1440 80" 
-              preserveAspectRatio="none"
-            >
-              <path 
-                fill="hsl(var(--secondary) / 0.1)" 
-                d="M0,50 C200,20 400,70 600,40 C800,10 1000,60 1200,30 L1440,50 L1440,80 L0,80 Z"
-              />
-            </svg>
-            
-            {/* Stats Cards - Floating Bubbles Style */}
-            <div className="relative grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {statsData.map((stat, index) => {
-                const Icon = stat.icon;
-                const isActive = index === activeStatIndex;
-                
-                return (
-                  <div
-                    key={stat.label}
-                    className="group relative animate-fade-in"
-                    style={{ animationDelay: `${stat.delay}s` }}
+        {/* Interactive Stats Grid */}
+        <div 
+          className={`w-full max-w-6xl mx-auto transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}
+        >
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {statsData.map((stat, index) => {
+              const Icon = stat.icon;
+              const isHovered = hoveredStat === index;
+              
+              return (
+                <div
+                  key={stat.label}
+                  onMouseEnter={() => setHoveredStat(index)}
+                  onMouseLeave={() => setHoveredStat(null)}
+                  className="relative group cursor-pointer"
+                  style={{
+                    animationDelay: `${0.8 + index * 0.15}s`,
+                  }}
+                >
+                  {/* Glow Effect */}
+                  <div 
+                    className={`absolute -inset-1 rounded-3xl bg-gradient-to-r ${stat.color} blur-xl transition-all duration-500 ${
+                      isHovered ? 'opacity-60 scale-105' : 'opacity-0 scale-100'
+                    }`}
+                  />
+                  
+                  {/* Card */}
+                  <div 
+                    className={`relative overflow-hidden rounded-2xl md:rounded-3xl backdrop-blur-xl border transition-all duration-500 ${
+                      isHovered 
+                        ? 'bg-card/40 border-primary/50 scale-105 shadow-2xl' 
+                        : 'bg-card/20 border-primary-foreground/10 hover:border-primary-foreground/20'
+                    }`}
+                    style={{
+                      transform: isHovered 
+                        ? `perspective(1000px) rotateX(${mousePosition.y * -10}deg) rotateY(${mousePosition.x * 10}deg) scale(1.05)` 
+                        : 'none',
+                      transition: 'all 0.4s cubic-bezier(0.33, 1, 0.68, 1)',
+                    }}
                   >
-                    {/* Bubble Background */}
-                    <div 
-                      className={`absolute inset-0 rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 blur-xl transition-all duration-700 ${
-                        isActive ? 'scale-110 opacity-80' : 'scale-100 opacity-40'
-                      }`}
-                    />
-                    
-                    {/* Card Content */}
-                    <div 
-                      className={`relative p-6 md:p-8 rounded-3xl backdrop-blur-md border transition-all duration-500 text-center overflow-hidden ${
-                        isActive 
-                          ? 'bg-primary/20 border-primary/40 scale-105 shadow-2xl shadow-primary/20' 
-                          : 'bg-card/30 border-primary-foreground/10 hover:bg-card/40 hover:scale-102'
-                      }`}
-                    >
-                      {/* Ripple Effect */}
-                      <div className={`absolute inset-0 rounded-3xl transition-opacity duration-500 ${
-                        isActive ? 'opacity-100' : 'opacity-0'
-                      }`}>
-                        <div className="absolute inset-0 animate-ripple rounded-3xl border-2 border-primary/30" />
-                        <div className="absolute inset-0 animate-ripple rounded-3xl border-2 border-primary/20" style={{ animationDelay: '0.5s' }} />
+                    {/* Animated Background Pattern */}
+                    <div className="absolute inset-0 opacity-30">
+                      <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-20`} />
+                      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <pattern id={`waves-${index}`} x="0" y="0" width="20" height="10" patternUnits="userSpaceOnUse">
+                          <path 
+                            d="M0 5 Q5 0 10 5 T20 5" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="0.5"
+                            className="text-primary-foreground/20"
+                          />
+                        </pattern>
+                        <rect width="100" height="100" fill={`url(#waves-${index})`} />
+                      </svg>
+                    </div>
+
+                    {/* Content */}
+                    <div className="relative p-6 md:p-8 text-center">
+                      {/* Icon Container */}
+                      <div 
+                        className={`mx-auto mb-4 w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center transition-all duration-500 ${
+                          isHovered 
+                            ? `bg-gradient-to-br ${stat.color} shadow-lg shadow-primary/30` 
+                            : 'bg-primary-foreground/10'
+                        }`}
+                      >
+                        <Icon 
+                          className={`h-7 w-7 md:h-8 md:w-8 transition-all duration-500 ${
+                            isHovered ? 'text-white scale-110' : 'text-primary-foreground/70'
+                          }`}
+                        />
                       </div>
                       
-                      {/* Fish Icon Swimming */}
-                      <div className={`absolute -right-2 top-1/2 -translate-y-1/2 transition-all duration-700 ${
-                        isActive ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
-                      }`}>
-                        <svg className="w-8 h-8 text-primary/40 animate-swim" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.8-.1 2.6-.3-.4-1.2-.6-2.5-.6-3.7 0-3.5 1.5-6.7 3.9-9-.6-.6-1.3-1.1-2-1.5C14.8 4.5 13.4 2 12 2zm-1 4c.6 0 1 .4 1 1s-.4 1-1 1-1-.4-1-1 .4-1 1-1z"/>
-                        </svg>
+                      {/* Value with Counter Effect */}
+                      <div className="relative">
+                        <p 
+                          className={`text-4xl md:text-5xl lg:text-6xl font-bold transition-all duration-500 ${
+                            isHovered 
+                              ? 'text-primary-foreground scale-110' 
+                              : 'text-primary-foreground/90'
+                          }`}
+                        >
+                          {stat.value}
+                        </p>
+                        {/* Shine Effect */}
+                        <div 
+                          className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent transition-all duration-700 ${
+                            isHovered ? 'translate-x-full' : '-translate-x-full'
+                          }`}
+                        />
                       </div>
-                      
-                      {/* Icon */}
-                      <div className={`mx-auto mb-3 w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${
-                        isActive 
-                          ? 'bg-primary text-primary-foreground scale-110' 
-                          : 'bg-primary/20 text-primary'
-                      }`}>
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      
-                      {/* Value */}
-                      <p className={`text-3xl md:text-4xl font-bold transition-all duration-500 ${
-                        isActive 
-                          ? 'text-primary-foreground scale-110' 
-                          : 'bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'
-                      }`}>
-                        {stat.value}
-                      </p>
                       
                       {/* Label */}
-                      <p className={`text-sm mt-1 transition-colors duration-500 ${
-                        isActive ? 'text-primary-foreground/80' : 'text-muted-foreground'
-                      }`}>
+                      <p 
+                        className={`text-sm md:text-base mt-2 font-medium tracking-wide transition-colors duration-500 ${
+                          isHovered ? 'text-primary-foreground' : 'text-primary-foreground/60'
+                        }`}
+                      >
                         {stat.label}
                       </p>
-                      
-                      {/* Water Level Animation */}
-                      <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-primary transition-all duration-700 ${
-                        isActive ? 'opacity-100' : 'opacity-0'
-                      }`}>
-                        <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-                      </div>
+
+                      {/* Bottom Accent Line */}
+                      <div 
+                        className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-1 rounded-full bg-gradient-to-r ${stat.color} transition-all duration-500 ${
+                          isHovered ? 'w-3/4 opacity-100' : 'w-0 opacity-0'
+                        }`}
+                      />
+                    </div>
+
+                    {/* Corner Decorations */}
+                    <div 
+                      className={`absolute top-0 right-0 w-16 h-16 transition-opacity duration-500 ${
+                        isHovered ? 'opacity-100' : 'opacity-0'
+                      }`}
+                    >
+                      <div className="absolute top-3 right-3 w-8 h-8 border-t-2 border-r-2 border-primary-foreground/30 rounded-tr-xl" />
+                    </div>
+                    <div 
+                      className={`absolute bottom-0 left-0 w-16 h-16 transition-opacity duration-500 ${
+                        isHovered ? 'opacity-100' : 'opacity-0'
+                      }`}
+                    >
+                      <div className="absolute bottom-3 left-3 w-8 h-8 border-b-2 border-l-2 border-primary-foreground/30 rounded-bl-xl" />
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* Scroll Indicator - More visible with proper spacing */}
-      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3">
-        <span className="text-sm font-medium text-primary-foreground/80 tracking-wide uppercase">
-          Scroll to explore
+      {/* Enhanced Scroll Indicator */}
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-4">
+        <span className="text-xs md:text-sm font-medium text-primary-foreground/60 tracking-[0.2em] uppercase animate-pulse-slow">
+          Dive In
         </span>
-        <div className="relative w-8 h-14 rounded-full border-2 border-primary-foreground/40 flex justify-center p-2 backdrop-blur-sm bg-card/20">
-          <div className="w-2 h-4 rounded-full bg-primary animate-scroll-down" />
-          {/* Ripple rings */}
-          <div className="absolute -inset-2 rounded-full border border-primary-foreground/20 animate-ping-slow" />
+        <div className="relative">
+          {/* Outer Ring */}
+          <div className="absolute -inset-4 rounded-full border border-primary-foreground/10 animate-ping-slow" />
+          <div className="absolute -inset-2 rounded-full border border-primary-foreground/20 animate-ping-slow" style={{ animationDelay: '0.5s' }} />
+          
+          {/* Main Indicator */}
+          <div className="relative w-7 h-12 rounded-full border-2 border-primary-foreground/40 flex justify-center pt-2 backdrop-blur-sm bg-card/10">
+            <div className="w-1.5 h-3 rounded-full bg-gradient-to-b from-primary to-secondary animate-scroll-down" />
+          </div>
         </div>
       </div>
     </section>
