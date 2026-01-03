@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
 import FishDetail from "./pages/FishDetail";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ProfileSetup from "./pages/ProfileSetup";
@@ -92,6 +93,7 @@ const App = () => (
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/fish/:id" element={<FishDetail />} />
               <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
               <Route path="/help" element={<Help />} />
               <Route path="/about" element={<About />} />
               <Route path="/blog" element={<Blog />} />

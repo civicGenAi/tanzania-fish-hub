@@ -166,8 +166,13 @@ const CartPage: React.FC = () => {
                   </div>
                 </div>
 
-                <Button variant="ocean" size="lg" className="w-full mb-4">
-                  <CreditCard className="h-5 w-5" />
+                <Button
+                  variant="ocean"
+                  size="lg"
+                  className="w-full mb-4"
+                  onClick={() => navigate('/checkout')}
+                >
+                  <CreditCard className="h-5 w-5 mr-2" />
                   Proceed to Checkout
                 </Button>
 
