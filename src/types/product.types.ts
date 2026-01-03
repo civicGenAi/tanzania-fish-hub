@@ -17,6 +17,8 @@ export interface Product {
   unit: ProductUnit;
   min_order_quantity: number;
   images: string[];
+  rating?: number;
+  total_reviews?: number;
   created_at: string;
   updated_at: string;
 }

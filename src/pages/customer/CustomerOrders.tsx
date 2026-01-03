@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, CheckCircle, Truck, Clock, Eye, Filter, Loader2 } from 'lucide-react';
+import { Package, CheckCircle, Truck, Clock, Eye, Filter, Loader2, Star } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import CustomerSidebar from '@/components/dashboard/CustomerSidebar';
 import { Button } from '@/components/ui/button';
@@ -9,8 +9,10 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { ordersService } from '@/services/orders.service';
 import { deliveriesService } from '@/services/deliveries.service';
-import { Order } from '@/types/order.types';
+import { reviewsService } from '@/services/reviews.service';
+import { Order, OrderWithDetails } from '@/types/order.types';
 import { Delivery } from '@/types/delivery.types';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 const CustomerOrders: React.FC = () => {
@@ -18,12 +20,19 @@ const CustomerOrders: React.FC = () => {
   const { toast } = useToast();
 
   const [filter, setFilter] = useState<string>('all');
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<OrderWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [trackingOrderId, setTrackingOrderId] = useState<string | null>(null);
   const [deliveryInfo, setDeliveryInfo] = useState<Delivery | null>(null);
   const [loadingDelivery, setLoadingDelivery] = useState(false);
+  const [reviewProductId, setReviewProductId] = useState<string | null>(null);
+  const [reviewOrderItemId, setReviewOrderItemId] = useState<string | null>(null);
+  const [reviewSellerId, setReviewSellerId] = useState<string | null>(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewTitle, setReviewTitle] = useState('');
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   const statusConfig = {
     pending: { icon: Clock, color: 'text-muted-foreground', bg: 'bg-muted', label: 'Pending' },
@@ -57,11 +66,18 @@ const CustomerOrders: React.FC = () => {
         if (customerError) throw customerError;
         setCustomerId(customerProfile.id);
 
-        // Get orders
-        const customerOrders = await ordersService.getOrders({
-          customer_id: customerProfile.id,
-        });
-        setOrders(customerOrders);
+        // Get orders with items
+        const { data: customerOrders, error: ordersError } = await supabase
+          .from('orders')
+          .select(`
+            *,
+            items:order_items(*)
+          `)
+          .eq('customer_id', customerProfile.id)
+          .order('created_at', { ascending: false });
+
+        if (ordersError) throw ordersError;
+        setOrders(customerOrders as OrderWithDetails[] || []);
       } catch (error) {
         console.error('Error fetching orders:', error);
         toast({
@@ -119,6 +135,66 @@ const CustomerOrders: React.FC = () => {
     delivered: { label: 'Delivered', color: 'text-secondary' },
     failed: { label: 'Delivery Failed', color: 'text-destructive' },
     cancelled: { label: 'Delivery Cancelled', color: 'text-destructive' },
+  };
+
+  const handleOpenReviewModal = (productId: string, orderItemId: string, sellerId: string) => {
+    setReviewProductId(productId);
+    setReviewOrderItemId(orderItemId);
+    setReviewSellerId(sellerId);
+    setReviewRating(0);
+    setReviewTitle('');
+    setReviewComment('');
+  };
+
+  const handleCloseReviewModal = () => {
+    setReviewProductId(null);
+    setReviewOrderItemId(null);
+    setReviewSellerId(null);
+    setReviewRating(0);
+    setReviewTitle('');
+    setReviewComment('');
+  };
+
+  const handleSubmitReview = async () => {
+    if (!customerId || !reviewProductId || !reviewOrderItemId || !reviewSellerId) return;
+
+    if (reviewRating === 0) {
+      toast({
+        title: 'Rating required',
+        description: 'Please select a rating',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      setSubmittingReview(true);
+
+      await reviewsService.createReview({
+        product_id: reviewProductId,
+        order_item_id: reviewOrderItemId,
+        customer_id: customerId,
+        seller_id: reviewSellerId,
+        rating: reviewRating,
+        title: reviewTitle,
+        comment: reviewComment,
+      });
+
+      toast({
+        title: 'Success',
+        description: 'Your review has been submitted',
+      });
+
+      handleCloseReviewModal();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to submit review',
+        variant: 'destructive',
+      });
+    } finally {
+      setSubmittingReview(false);
+    }
   };
 
   const filteredOrders = orders.filter(order => {
@@ -240,6 +316,33 @@ const CustomerOrders: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Order Items - Show for delivered orders to allow reviews */}
+                {order.status === 'delivered' && order.items && order.items.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <h4 className="font-semibold mb-3 text-sm">Order Items</h4>
+                    <div className="space-y-2">
+                      {order.items.map((item) => (
+                        <div key={item.id} className="flex items-center justify-between bg-muted/30 rounded-lg p-3">
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{item.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Qty: {item.quantity} × {formatPrice(item.unit_price)}
+                            </p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenReviewModal(item.product_id, item.id, item.seller_id)}
+                          >
+                            <Star className="h-4 w-4 mr-1" />
+                            Review
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Delivery Tracking Info */}
                 {trackingOrderId === order.id && deliveryInfo && (
                   <div className="mt-4 pt-4 border-t border-border">
@@ -304,6 +407,88 @@ const CustomerOrders: React.FC = () => {
               </div>
             );
           })}
+          </div>
+        )}
+
+        {/* Review Modal */}
+        {reviewProductId && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-card border border-border rounded-2xl p-6 max-w-lg w-full">
+              <h3 className="text-xl font-semibold mb-4">Write a Review</h3>
+
+              {/* Star Rating */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Rating</label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setReviewRating(star)}
+                      className="focus:outline-none"
+                    >
+                      <Star
+                        className={cn(
+                          "h-8 w-8 transition-colors",
+                          star <= reviewRating
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-muted-foreground"
+                        )}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Review Title */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Title (Optional)</label>
+                <Input
+                  placeholder="Summarize your review"
+                  value={reviewTitle}
+                  onChange={(e) => setReviewTitle(e.target.value)}
+                />
+              </div>
+
+              {/* Review Comment */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium mb-2">Review (Optional)</label>
+                <textarea
+                  placeholder="Share your experience with this product..."
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  rows={4}
+                  className="w-full px-4 py-2.5 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={handleCloseReviewModal}
+                  disabled={submittingReview}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="ocean"
+                  className="flex-1"
+                  onClick={handleSubmitReview}
+                  disabled={submittingReview || reviewRating === 0}
+                >
+                  {submittingReview ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    'Submit Review'
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
         )}
       </div>
