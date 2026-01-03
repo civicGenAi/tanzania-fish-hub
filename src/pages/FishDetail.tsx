@@ -4,6 +4,7 @@ import { ArrowLeft, Star, MapPin, Shield, Plus, Minus, ShoppingCart, Heart, Shar
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useCart } from '@/contexts/CartContext';
 import { productsService } from '@/services/products.service';
 import { Product, ProductWithDetails } from '@/types/product.types';
 
@@ -11,6 +12,7 @@ const FishDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { addToCart, isInCart } = useCart();
 
   const [product, setProduct] = useState<ProductWithDetails | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
@@ -28,6 +30,7 @@ const FishDetailPage: React.FC = () => {
 
         if (productData) {
           setProduct(productData);
+          setQuantity(productData.min_order_quantity);
 
           // Fetch related products from same category
           if (productData.category_id) {
@@ -57,7 +60,7 @@ const FishDetailPage: React.FC = () => {
   const handleAddToCart = () => {
     if (!product) return;
 
-    // TODO: Update when cart context is updated to work with products
+    addToCart(product, quantity);
     toast({
       title: "Added to cart!",
       description: `${quantity} ${product.unit} of ${product.name} added to your cart.`,
@@ -278,7 +281,7 @@ const FishDetailPage: React.FC = () => {
                     disabled={product.status !== 'active' || product.stock_quantity === 0}
                   >
                     <ShoppingCart className="h-5 w-5" />
-                    Add to Cart
+                    {isInCart(product.id) ? 'Add More' : 'Add to Cart'}
                   </Button>
                   <Button
                     variant="outline"
