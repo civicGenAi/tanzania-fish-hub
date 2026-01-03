@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Plus, Edit, Trash2, Eye, EyeOff, Search, Filter, Loader2 } from 'lucide-react';
+import { Package, Plus, Edit, Trash2, Eye, EyeOff, Search, Filter, Loader2, Download, Upload } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import SellerSidebar from '@/components/dashboard/SellerSidebar';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ const SellerProducts: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [sellerId, setSellerId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchSellerIdAndProducts = async () => {
@@ -116,6 +117,121 @@ const SellerProducts: React.FC = () => {
     }).format(price);
   };
 
+  const handleExportCSV = () => {
+    if (products.length === 0) {
+      toast({
+        title: 'No products',
+        description: 'You have no products to export',
+        variant: 'default',
+      });
+      return;
+    }
+
+    const headers = ['Name', 'SKU', 'Price', 'Stock', 'Unit', 'Status', 'Category ID', 'Description'];
+    const rows = products.map(p => [
+      p.name,
+      p.sku,
+      p.price,
+      p.stock,
+      p.unit,
+      p.status,
+      p.category_id,
+      p.description || '',
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `products-export-${Date.now()}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    toast({
+      title: 'Success',
+      description: `Exported ${products.length} products`,
+    });
+  };
+
+  const handleImportCSV = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !sellerId) return;
+
+    try {
+      const text = await file.text();
+      const lines = text.split('\n').filter(line => line.trim());
+
+      if (lines.length < 2) {
+        toast({
+          title: 'Error',
+          description: 'CSV file is empty',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+      const imported: Product[] = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
+
+        if (values.length < 6) continue;
+
+        const name = values[0];
+        const price = parseFloat(values[2]);
+        const stock = parseInt(values[3]);
+        const unit = values[4] as any;
+        const category_id = values[6];
+
+        if (!name || !price || !stock || !category_id) continue;
+
+        const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const sku = `${slug}-${Date.now()}-${i}`.toUpperCase();
+
+        const product = await productsService.createProduct(sellerId, {
+          name,
+          slug,
+          sku,
+          price,
+          stock,
+          unit: unit || 'kg',
+          category_id,
+          description: values[7] || undefined,
+        });
+
+        imported.push(product);
+      }
+
+      setProducts([...products, ...imported]);
+
+      toast({
+        title: 'Success',
+        description: `Imported ${imported.length} products`,
+      });
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('Error importing CSV:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to import products',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <DashboardLayout
       sidebar={<SellerSidebar />}
@@ -136,8 +252,23 @@ const SellerProducts: React.FC = () => {
             />
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={handleExportCSV} disabled={products.length === 0}>
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+            <Button variant="outline" onClick={handleImportCSV}>
+              <Upload className="h-4 w-4 mr-2" />
+              Import CSV
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              onChange={handleFileChange}
+              className="hidden"
+            />
             <Button variant="ocean" onClick={() => navigate('/seller/products/new')}>
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 mr-2" />
               Add Product
             </Button>
           </div>
@@ -174,7 +305,7 @@ const SellerProducts: React.FC = () => {
               <div key={product.id} className="bg-card border border-border rounded-2xl overflow-hidden group">
                 <div className="relative">
                   <img
-                    src={product.image_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400'}
+                    src={product.images?.[0] || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400'}
                     alt={product.name}
                     className="w-full h-40 object-cover"
                   />

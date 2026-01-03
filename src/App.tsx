@@ -40,6 +40,7 @@ import SellerEarnings from "./pages/seller/SellerEarnings";
 import SellerCustomers from "./pages/seller/SellerCustomers";
 import SellerReviews from "./pages/seller/SellerReviews";
 import SellerNewProduct from "./pages/seller/SellerNewProduct";
+import SellerEditProduct from "./pages/seller/SellerEditProduct";
 import SellerSettings from "./pages/seller/SellerSettings";
 import SellerDeliveries from "./pages/seller/SellerDeliveries";
 import SellerMessages from "./pages/seller/SellerMessages";
@@ -120,6 +121,7 @@ const App = () => (
               <Route path="/seller" element={<ProtectedRoute allowedRoles={['seller']}><SellerDashboard /></ProtectedRoute>} />
               <Route path="/seller/products" element={<ProtectedRoute allowedRoles={['seller']}><SellerProducts /></ProtectedRoute>} />
               <Route path="/seller/products/new" element={<ProtectedRoute allowedRoles={['seller']}><SellerNewProduct /></ProtectedRoute>} />
+              <Route path="/seller/products/:id/edit" element={<ProtectedRoute allowedRoles={['seller']}><SellerEditProduct /></ProtectedRoute>} />
               <Route path="/seller/orders" element={<ProtectedRoute allowedRoles={['seller']}><SellerOrders /></ProtectedRoute>} />
               <Route path="/seller/analytics" element={<ProtectedRoute allowedRoles={['seller']}><SellerAnalytics /></ProtectedRoute>} />
               <Route path="/seller/earnings" element={<ProtectedRoute allowedRoles={['seller']}><SellerEarnings /></ProtectedRoute>} />
