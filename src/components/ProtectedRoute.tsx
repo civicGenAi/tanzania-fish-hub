@@ -37,9 +37,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Redirect to login if profile not found
-  if (requireAuth && !profile) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  // Redirect to profile setup if user is logged in but profile doesn't exist
+  if (requireAuth && user && !profile) {
+    // Don't redirect if already on profile setup page
+    if (location.pathname !== '/profile-setup') {
+      return <Navigate to="/profile-setup" replace />;
+    }
   }
 
   // Check role-based access
@@ -84,10 +87,15 @@ export const GuestRoute: React.FC<{ children: React.ReactNode }> = ({ children }
     );
   }
 
-  // Redirect authenticated users to their dashboard
+  // Redirect authenticated users with profile to their dashboard
   if (user && profile) {
     const dashboardPath = getDashboardPath(profile.user_type);
     return <Navigate to={dashboardPath} replace />;
+  }
+
+  // If user is authenticated but no profile, redirect to profile setup
+  if (user && !profile) {
+    return <Navigate to="/profile-setup" replace />;
   }
 
   return <>{children}</>;

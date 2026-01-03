@@ -11,6 +11,7 @@ import FishDetail from "./pages/FishDetail";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ProfileSetup from "./pages/ProfileSetup";
 import Help from "./pages/Help";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
@@ -98,6 +99,7 @@ const App = () => (
               {/* Auth Routes - Redirect to dashboard if already logged in */}
               <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
               <Route path="/signup" element={<GuestRoute><Signup /></GuestRoute>} />
+              <Route path="/profile-setup" element={<ProfileSetup />} />
 
               {/* Customer Dashboard Routes - Protected */}
               <Route path="/dashboard" element={

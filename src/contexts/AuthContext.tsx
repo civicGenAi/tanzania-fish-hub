@@ -28,6 +28,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, userData: SignUpData) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  createUserProfile: (userData: SignUpData) => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -150,7 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Sign in function - Creates profile on first login if it doesn't exist
+  // Sign in function - Does NOT create profile automatically
   const signIn = async (email: string, password: string): Promise<void> => {
     try {
       setLoading(true);
@@ -163,39 +164,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
       if (!data.user) throw new Error('Login failed');
 
-      // Try to fetch existing profile
-      let userProfile = await fetchProfile(data.user.id);
+      // Fetch user profile (if it exists)
+      const userProfile = await fetchProfile(data.user.id);
 
-      // If profile doesn't exist, create it from user metadata (first login after email confirmation)
-      if (!userProfile) {
-        const metadata = data.user.user_metadata;
-
-        if (!metadata || !metadata.user_type) {
-          throw new Error('User metadata not found. Please contact support.');
+      // If profile exists, check if suspended
+      if (userProfile) {
+        if (userProfile.status === 'suspended') {
+          await supabase.auth.signOut();
+          throw new Error('Your account has been suspended. Please contact support.');
         }
-
-        // Create profile from metadata
-        await createProfile(data.user.id, data.user.email!, {
-          full_name: metadata.full_name || '',
-          phone: metadata.phone || undefined,
-          user_type: metadata.user_type as UserType
-        });
-
-        // Fetch the newly created profile
-        userProfile = await fetchProfile(data.user.id);
-
-        if (!userProfile) {
-          throw new Error('Failed to create profile. Please contact support.');
-        }
+        setProfile(userProfile);
+      } else {
+        // Profile doesn't exist - user will be redirected to setup page
+        setProfile(null);
       }
-
-      // Check if account is suspended
-      if (userProfile.status === 'suspended') {
-        await supabase.auth.signOut();
-        throw new Error('Your account has been suspended. Please contact support.');
-      }
-
-      setProfile(userProfile);
 
     } catch (error) {
       console.error('Sign in error:', error);
@@ -217,6 +199,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(null);
     } catch (error) {
       console.error('Sign out error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Create user profile function - called from profile setup page
+  const createUserProfile = async (userData: SignUpData): Promise<void> => {
+    if (!user) throw new Error('No user logged in');
+
+    try {
+      setLoading(true);
+
+      // Create profile
+      await createProfile(user.id, user.email!, userData);
+
+      // Fetch the created profile
+      const userProfile = await fetchProfile(user.id);
+
+      if (!userProfile) {
+        throw new Error('Failed to create profile. Please try again.');
+      }
+
+      setProfile(userProfile);
+
+    } catch (error) {
+      console.error('Create profile error:', error);
       throw error;
     } finally {
       setLoading(false);
@@ -253,13 +262,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Initialize auth state
   useEffect(() => {
+    let mounted = true;
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+
       setSession(session);
       setUser(session?.user ?? null);
 
       if (session?.user) {
-        fetchProfile(session.user.id).then(setProfile);
+        fetchProfile(session.user.id).then((profile) => {
+          if (mounted) setProfile(profile);
+        });
       }
       setLoading(false);
     });
@@ -267,22 +282,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+
         console.log('Auth event:', event);
-        setSession(session);
-        setUser(session?.user ?? null);
 
-        if (session?.user) {
-          const userProfile = await fetchProfile(session.user.id);
-          setProfile(userProfile);
-        } else {
+        // Only handle specific events to avoid infinite loops
+        if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUser(null);
           setProfile(null);
-        }
+          setLoading(false);
+        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          setSession(session);
+          setUser(session?.user ?? null);
 
-        setLoading(false);
+          if (session?.user) {
+            const userProfile = await fetchProfile(session.user.id);
+            if (mounted) {
+              setProfile(userProfile);
+            }
+          }
+          setLoading(false);
+        }
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const value = {
@@ -293,6 +321,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     signIn,
     signOut,
+    createUserProfile,
     updateProfile,
     refreshProfile
   };
