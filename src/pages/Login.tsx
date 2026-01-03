@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { getDashboardPath } from '@/components/ProtectedRoute';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -13,13 +14,21 @@ const LoginPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { signIn } = useAuth();
+  const { signIn, profile, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get redirect path from location state or default to home
-  const from = (location.state as any)?.from?.pathname || '/';
+  // Get redirect path from location state
+  const from = (location.state as any)?.from?.pathname;
+
+  // Redirect after successful login
+  React.useEffect(() => {
+    if (user && profile && !isLoading) {
+      const dashboardPath = from || getDashboardPath(profile.user_type);
+      navigate(dashboardPath, { replace: true });
+    }
+  }, [user, profile, isLoading, from, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,8 +60,8 @@ const LoginPage: React.FC = () => {
         description: 'You have successfully signed in.',
       });
 
-      // Redirect will happen automatically via AuthContext and ProtectedRoute
-      navigate(from, { replace: true });
+      // Don't navigate here - let the component re-render and handle redirect
+      // The useEffect below will handle navigation once profile is loaded
     } catch (err: any) {
       console.error('Login error:', err);
 

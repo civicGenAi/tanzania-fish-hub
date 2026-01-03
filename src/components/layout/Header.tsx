@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Fish, ShoppingCart, User, Menu, X, Search } from 'lucide-react';
+import { Fish, ShoppingCart, User, Menu, X, Search, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { getDashboardPath } from '@/components/ProtectedRoute';
 import { cn } from '@/lib/utils';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { totalItems } = useCart();
-  const { user, isAuthenticated } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const location = useLocation();
 
   const navLinks = [
@@ -18,17 +19,12 @@ const Header: React.FC = () => {
     { href: '/blog', label: 'Blog' },
   ];
 
-  const getDashboardLink = () => {
-    if (!user) return '/login';
-    switch (user.role) {
-      case 'seller':
-        return '/seller';
-      case 'distributor':
-        return '/distributor';
-      case 'admin':
-        return '/admin';
-      default:
-        return '/dashboard';
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      setIsMenuOpen(false);
+    } catch (error) {
+      console.error('Logout error:', error);
     }
   };
 
@@ -87,12 +83,18 @@ const Header: React.FC = () => {
           </Link>
 
           {/* User/Auth */}
-          {isAuthenticated ? (
-            <Link to={getDashboardLink()}>
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
+          {user && profile ? (
+            <div className="hidden md:flex items-center gap-2">
+              <Link to={getDashboardPath(profile.user_type)}>
+                <Button variant="ocean" size="sm">
+                  <User className="h-4 w-4 mr-2" />
+                  Dashboard
+                </Button>
+              </Link>
+              <Button variant="ghost" size="icon" onClick={handleLogout}>
+                <LogOut className="h-5 w-5" />
               </Button>
-            </Link>
+            </div>
           ) : (
             <Link to="/login" className="hidden md:block">
               <Button variant="ocean" size="sm">
@@ -132,7 +134,20 @@ const Header: React.FC = () => {
                 {link.label}
               </Link>
             ))}
-            {!isAuthenticated && (
+            {user && profile ? (
+              <div className="mt-4 space-y-2">
+                <Link to={getDashboardPath(profile.user_type)} onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="ocean" className="w-full">
+                    <User className="h-4 w-4 mr-2" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <Button variant="outline" className="w-full" onClick={handleLogout}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
+            ) : (
               <Link to="/login" onClick={() => setIsMenuOpen(false)}>
                 <Button variant="ocean" className="w-full mt-2">
                   Login
