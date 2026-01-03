@@ -172,11 +172,11 @@ const MarketplacePage: React.FC = () => {
                                 style: 'currency',
                                 currency: 'TZS',
                                 minimumFractionDigits: 0,
-                              }).format(product.base_price)}/{product.unit}
+                              }).format(product.price)}/{product.unit}
                             </p>
-                            {product.stock_quantity > 0 && (
+                            {product.stock > 0 && (
                               <p className="text-xs text-muted-foreground">
-                                {product.stock_quantity} {product.unit} available
+                                {product.stock} {product.unit} available
                               </p>
                             )}
                           </div>

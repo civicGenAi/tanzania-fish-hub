@@ -9,9 +9,9 @@ export interface Product {
   category_id: string;
   name: string;
   description: string | null;
-  base_price: number;
+  price: number;
   status: ProductStatus;
-  stock_quantity: number;
+  stock: number;
   unit: ProductUnit;
   min_order_quantity: number;
   image_url: string | null;
@@ -24,7 +24,7 @@ export interface ProductVariant {
   product_id: string;
   name: string;
   price: number;
-  stock_quantity: number;
+  stock: number;
   sku: string | null;
   attributes: Record<string, any> | null;
   created_at: string;
@@ -53,8 +53,8 @@ export interface CreateProductData {
   category_id: string;
   name: string;
   description?: string;
-  base_price: number;
-  stock_quantity: number;
+  price: number;
+  stock: number;
   unit: ProductUnit;
   min_order_quantity?: number;
   image_url?: string;
@@ -64,9 +64,9 @@ export interface UpdateProductData {
   category_id?: string;
   name?: string;
   description?: string;
-  base_price?: number;
+  price?: number;
   status?: ProductStatus;
-  stock_quantity?: number;
+  stock?: number;
   unit?: ProductUnit;
   min_order_quantity?: number;
   image_url?: string;

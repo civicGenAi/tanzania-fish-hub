@@ -96,7 +96,7 @@ const CartPage: React.FC = () => {
                           <p className="text-sm text-muted-foreground line-clamp-1">{item.product.description}</p>
                         )}
                         <p className="text-xs text-muted-foreground mt-1">
-                          {formatPrice(item.product.base_price)} per {item.product.unit}
+                          {formatPrice(item.product.price)} per {item.product.unit}
                         </p>
                       </div>
                       <Button
@@ -131,7 +131,7 @@ const CartPage: React.FC = () => {
                         <span className="text-sm text-muted-foreground ml-1">{item.product.unit}</span>
                       </div>
                       <p className="font-bold text-lg">
-                        {formatPrice(item.product.base_price * item.quantity)}
+                        {formatPrice(item.product.price * item.quantity)}
                       </p>
                     </div>
                   </div>

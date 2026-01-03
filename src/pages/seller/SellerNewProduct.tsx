@@ -27,8 +27,8 @@ const SellerNewProduct: React.FC = () => {
     name: '',
     description: '',
     category_id: '',
-    base_price: '',
-    stock_quantity: '',
+    price: '',
+    stock: '',
     unit: 'kg' as ProductUnit,
     min_order_quantity: '1',
   });
@@ -105,12 +105,12 @@ const SellerNewProduct: React.FC = () => {
       newErrors.category_id = 'Please select a category';
     }
 
-    if (!formData.base_price || parseFloat(formData.base_price) <= 0) {
-      newErrors.base_price = 'Please enter a valid price';
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      newErrors.price = 'Please enter a valid price';
     }
 
-    if (!formData.stock_quantity || parseInt(formData.stock_quantity) < 0) {
-      newErrors.stock_quantity = 'Please enter a valid stock quantity';
+    if (!formData.stock || parseInt(formData.stock) < 0) {
+      newErrors.stock = 'Please enter a valid stock quantity';
     }
 
     setErrors(newErrors);
@@ -163,8 +163,8 @@ const SellerNewProduct: React.FC = () => {
         name: formData.name,
         description: formData.description || undefined,
         category_id: formData.category_id,
-        base_price: parseFloat(formData.base_price),
-        stock_quantity: parseInt(formData.stock_quantity),
+        price: parseFloat(formData.price),
+        stock: parseInt(formData.stock),
         unit: formData.unit,
         min_order_quantity: parseInt(formData.min_order_quantity),
         image_url: imageUrl,
@@ -309,15 +309,15 @@ const SellerNewProduct: React.FC = () => {
                 </label>
                 <Input
                   type="number"
-                  name="base_price"
-                  value={formData.base_price}
+                  name="price"
+                  value={formData.price}
                   onChange={handleChange}
                   placeholder="15000"
                   min="0"
                   step="100"
                   className="h-12"
                 />
-                {errors.base_price && <p className="text-sm text-red-600 mt-1">{errors.base_price}</p>}
+                {errors.price && <p className="text-sm text-red-600 mt-1">{errors.price}</p>}
               </div>
 
               <div>
@@ -343,14 +343,14 @@ const SellerNewProduct: React.FC = () => {
                 </label>
                 <Input
                   type="number"
-                  name="stock_quantity"
-                  value={formData.stock_quantity}
+                  name="stock"
+                  value={formData.stock}
                   onChange={handleChange}
                   placeholder="50"
                   min="0"
                   className="h-12"
                 />
-                {errors.stock_quantity && <p className="text-sm text-red-600 mt-1">{errors.stock_quantity}</p>}
+                {errors.stock && <p className="text-sm text-red-600 mt-1">{errors.stock}</p>}
               </div>
 
               <div>

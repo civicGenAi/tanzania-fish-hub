@@ -228,8 +228,8 @@ const SellerProducts: React.FC = () => {
                     </button>
                   </div>
                   <div className="flex items-center justify-between">
-                    <p className="font-bold text-primary">{formatPrice(product.base_price)}/{product.unit}</p>
-                    <p className="text-sm text-muted-foreground">Stock: {product.stock_quantity}{product.unit}</p>
+                    <p className="font-bold text-primary">{formatPrice(product.price)}/{product.unit}</p>
+                    <p className="text-sm text-muted-foreground">Stock: {product.stock}{product.unit}</p>
                   </div>
                 </div>
               </div>
