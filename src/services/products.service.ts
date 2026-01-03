@@ -172,7 +172,7 @@ class ProductsService {
   async getCategories(): Promise<ProductCategory[]> {
     try {
       const { data, error } = await supabase
-        .from('product_categories')
+        .from('categories')
         .select('*')
         .order('name');
 

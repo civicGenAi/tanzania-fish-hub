@@ -1,32 +1,85 @@
-import React, { useState } from 'react';
-import { 
+import React, { useState, useEffect } from 'react';
+import {
   Package, DollarSign, Star, TrendingUp, Plus, Edit, Trash2,
-  Eye, EyeOff, BarChart3, Users, ArrowUpRight, ArrowDownRight
+  Eye, EyeOff, BarChart3, Users, ArrowUpRight, ArrowDownRight, Loader2
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import SellerSidebar from '@/components/dashboard/SellerSidebar';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { sampleFish, formatTZS, sampleOrders } from '@/data/fishData';
+import { productsService } from '@/services/products.service';
+import { supabase } from '@/lib/supabase';
+import { Product } from '@/types/product.types';
 import { cn } from '@/lib/utils';
 
 const SellerDashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [activeTab, setActiveTab] = useState('products');
+  const [loading, setLoading] = useState(true);
+  const [myProducts, setMyProducts] = useState<Product[]>([]);
+  const [productCount, setProductCount] = useState(0);
+  const [orderCount, setOrderCount] = useState(0);
 
-  const myProducts = sampleFish.slice(0, 4);
-  const pendingOrders = sampleOrders.filter(o => o.status !== 'delivered');
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-TZ', {
+      style: 'currency',
+      currency: 'TZS',
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!profile || profile.user_type !== 'seller') {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        // Get seller_id
+        const { data: sellerProfile } = await supabase
+          .from('seller_profiles')
+          .select('id')
+          .eq('user_id', profile.id)
+          .single();
+
+        if (sellerProfile) {
+          // Get products
+          const products = await productsService.getSellerProducts(sellerProfile.id);
+          setMyProducts(products.slice(0, 4));
+          setProductCount(products.length);
+
+          // Get order count
+          const { count } = await supabase
+            .from('orders')
+            .select('*', { count: 'exact', head: true })
+            .eq('seller_id', sellerProfile.id)
+            .in('status', ['pending', 'processing', 'confirmed']);
+
+          setOrderCount(count || 0);
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [profile]);
 
   const stats = [
-    { label: 'Total Sales', value: formatTZS(2450000), change: '+12%', trend: 'up', icon: DollarSign, color: 'bg-secondary' },
-    { label: 'Active Products', value: '8', change: '+2', trend: 'up', icon: Package, color: 'bg-primary' },
-    { label: 'Pending Orders', value: '5', change: '-1', trend: 'down', icon: TrendingUp, color: 'bg-accent' },
-    { label: 'Avg Rating', value: '4.8', change: '+0.2', trend: 'up', icon: Star, color: 'bg-yellow-500' },
+    { label: 'Total Sales', value: formatPrice(0), change: '+0%', trend: 'up', icon: DollarSign, color: 'bg-secondary' },
+    { label: 'Active Products', value: productCount.toString(), change: `+${productCount}`, trend: 'up', icon: Package, color: 'bg-primary' },
+    { label: 'Pending Orders', value: orderCount.toString(), change: `+${orderCount}`, trend: 'up', icon: TrendingUp, color: 'bg-accent' },
+    { label: 'Avg Rating', value: '0.0', change: '+0.0', trend: 'up', icon: Star, color: 'bg-yellow-500' },
   ];
 
   const tabs = [
-    { id: 'products', label: 'My Products', count: 8 },
-    { id: 'orders', label: 'Orders', count: 5 },
+    { id: 'products', label: 'My Products', count: productCount },
+    { id: 'orders', label: 'Orders', count: orderCount },
     { id: 'analytics', label: 'Analytics' },
   ];
 
@@ -93,51 +146,62 @@ const SellerDashboard: React.FC = () => {
           </div>
 
           <div className="p-4 md:p-6">
-            {/* Products Tab */}
-            {activeTab === 'products' && (
-              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {myProducts.map((product) => (
-                  <div key={product.id} className="bg-muted/30 border border-border/50 rounded-xl overflow-hidden group">
-                    <div className="relative">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-36 object-cover"
-                      />
-                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 bg-background/90 backdrop-blur-sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 bg-background/90 backdrop-blur-sm text-destructive">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <div className="absolute bottom-2 left-2">
-                        <span className={cn(
-                          "px-2 py-1 rounded-full text-xs font-medium",
-                          product.inStock ? 'bg-secondary text-secondary-foreground' : 'bg-muted text-muted-foreground'
-                        )}>
-                          {product.inStock ? 'In Stock' : 'Out of Stock'}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div>
-                          <h3 className="font-semibold text-sm">{product.name}</h3>
-                          <p className="text-xs text-muted-foreground">{product.nameSwahili}</p>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <>
+                {/* Products Tab */}
+                {activeTab === 'products' && (
+                  <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {myProducts.map((product) => {
+                      const inStock = product.status === 'active' && product.stock_quantity > 0;
+                      return (
+                        <div key={product.id} className="bg-muted/30 border border-border/50 rounded-xl overflow-hidden group">
+                          <div className="relative">
+                            <img
+                              src={product.image_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400'}
+                              alt={product.name}
+                              className="w-full h-36 object-cover"
+                            />
+                            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 bg-background/90 backdrop-blur-sm">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 bg-background/90 backdrop-blur-sm text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <div className="absolute bottom-2 left-2">
+                              <span className={cn(
+                                "px-2 py-1 rounded-full text-xs font-medium",
+                                inStock ? 'bg-secondary text-secondary-foreground' : 'bg-muted text-muted-foreground'
+                              )}>
+                                {inStock ? 'In Stock' : 'Out of Stock'}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="p-4">
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <div>
+                                <h3 className="font-semibold text-sm">{product.name}</h3>
+                                {product.description && (
+                                  <p className="text-xs text-muted-foreground line-clamp-1">{product.description}</p>
+                                )}
+                              </div>
+                              <button className={cn(
+                                "p-1.5 rounded-full transition-colors",
+                                inStock ? 'bg-green-light text-secondary hover:bg-secondary hover:text-secondary-foreground' : 'bg-muted text-muted-foreground'
+                              )}>
+                                {inStock ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                              </button>
+                            </div>
+                            <p className="font-bold text-primary">{formatPrice(product.base_price)}/{product.unit}</p>
+                          </div>
                         </div>
-                        <button className={cn(
-                          "p-1.5 rounded-full transition-colors",
-                          product.inStock ? 'bg-green-light text-secondary hover:bg-secondary hover:text-secondary-foreground' : 'bg-muted text-muted-foreground'
-                        )}>
-                          {product.inStock ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                        </button>
-                      </div>
-                      <p className="font-bold text-primary">{formatTZS(product.price)}/{product.unit}</p>
-                    </div>
-                  </div>
-                ))}
+                      );
+                    })}
                 
                 {/* Add Product Card */}
                 <button className="bg-muted/30 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center p-8 hover:border-primary hover:bg-ocean-light/30 transition-all min-h-[200px]">
@@ -150,82 +214,38 @@ const SellerDashboard: React.FC = () => {
               </div>
             )}
 
-            {/* Orders Tab */}
-            {activeTab === 'orders' && (
-              <div className="space-y-3">
-                {pendingOrders.map((order) => (
-                  <div key={order.id} className="flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-xl bg-muted/30 border border-border/50">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="font-semibold text-sm">{order.id}</p>
-                        <span className="px-2 py-0.5 rounded-full bg-accent/10 text-accent text-xs font-medium capitalize">
-                          {order.status.replace(/_/g, ' ')}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mb-2">
-                        {new Date(order.createdAt).toLocaleString()}
-                      </p>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {order.items.map((item, i) => (
-                          <span key={i} className="text-xs bg-muted px-2 py-1 rounded">
-                            {item.quantity}{item.fish.unit} {item.fish.name}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <p className="font-semibold">{formatTZS(order.total)}</p>
-                        <p className="text-xs text-muted-foreground truncate max-w-[150px]">{order.deliveryAddress.split(',')[0]}</p>
-                      </div>
-                      <Button variant="ocean" size="sm">Process</Button>
-                    </div>
+                {/* Orders Tab */}
+                {activeTab === 'orders' && (
+                  <div className="text-center py-12">
+                    <ShoppingCart className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground">No pending orders</p>
                   </div>
-                ))}
-              </div>
-            )}
+                )}
 
-            {/* Analytics Tab */}
-            {activeTab === 'analytics' && (
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="p-4 rounded-xl bg-muted/30 border border-border/50">
-                  <div className="flex items-center gap-2 mb-4">
-                    <BarChart3 className="h-5 w-5 text-primary" />
-                    <h3 className="font-semibold">Weekly Sales</h3>
-                  </div>
-                  <div className="h-40 flex items-end justify-between gap-2">
-                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
-                      <div key={day} className="flex-1 flex flex-col items-center gap-2">
-                        <div 
-                          className="w-full ocean-gradient rounded-t-lg transition-all hover:opacity-80"
-                          style={{ height: `${[60, 80, 45, 90, 70, 100, 55][i]}%` }}
-                        />
-                        <span className="text-xs text-muted-foreground">{day}</span>
+                {/* Analytics Tab */}
+                {activeTab === 'analytics' && (
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="p-4 rounded-xl bg-muted/30 border border-border/50">
+                      <div className="flex items-center gap-2 mb-4">
+                        <BarChart3 className="h-5 w-5 text-primary" />
+                        <h3 className="font-semibold">Weekly Sales</h3>
                       </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="p-4 rounded-xl bg-muted/30 border border-border/50">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Users className="h-5 w-5 text-secondary" />
-                    <h3 className="font-semibold">Top Customers</h3>
-                  </div>
-                  <div className="space-y-3">
-                    {['Serena Hotel', 'Mama Lisu Restaurant', 'Mikocheni Butchery'].map((customer, i) => (
-                      <div key={customer} className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
-                          {i + 1}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium text-sm">{customer}</p>
-                          <p className="text-xs text-muted-foreground">{12 - i * 3} orders</p>
-                        </div>
-                        <p className="font-semibold text-sm">{formatTZS((12 - i * 3) * 85000)}</p>
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p>Analytics coming soon</p>
                       </div>
-                    ))}
+                    </div>
+                    <div className="p-4 rounded-xl bg-muted/30 border border-border/50">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Users className="h-5 w-5 text-secondary" />
+                        <h3 className="font-semibold">Top Customers</h3>
+                      </div>
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p>No customer data yet</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                )}
+              </>
             )}
           </div>
         </div>
