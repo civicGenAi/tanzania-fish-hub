@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Sidebar,
@@ -15,20 +15,59 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { NavLink } from '@/components/NavLink';
-import { 
-  Fish, LayoutDashboard, Package, ShoppingCart, BarChart3, 
-  DollarSign, Users, Star, Settings, LogOut, Bell, 
+import {
+  Fish, LayoutDashboard, Package, ShoppingCart, BarChart3,
+  DollarSign, Users, Star, Settings, LogOut, Bell,
   PlusCircle, Truck, MessageSquare
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { productsService } from '@/services/products.service';
+import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
 const SellerSidebar: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
+
+  const [productCount, setProductCount] = useState(0);
+  const [orderCount, setOrderCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      if (!profile || profile.user_type !== 'seller') return;
+
+      try {
+        // Get seller_id
+        const { data: sellerProfile } = await supabase
+          .from('seller_profiles')
+          .select('id')
+          .eq('user_id', profile.id)
+          .single();
+
+        if (sellerProfile) {
+          // Get product count
+          const products = await productsService.getSellerProducts(sellerProfile.id);
+          setProductCount(products.length);
+
+          // Get order count (pending orders)
+          const { count } = await supabase
+            .from('orders')
+            .select('*', { count: 'exact', head: true })
+            .eq('seller_id', sellerProfile.id)
+            .in('status', ['pending', 'processing', 'confirmed']);
+
+          setOrderCount(count || 0);
+        }
+      } catch (error) {
+        console.error('Error fetching counts:', error);
+      }
+    };
+
+    fetchCounts();
+  }, [profile]);
 
   const handleLogout = () => {
     logout();
@@ -37,9 +76,9 @@ const SellerSidebar: React.FC = () => {
 
   const mainNavItems = [
     { title: 'Dashboard', url: '/seller', icon: LayoutDashboard },
-    { title: 'My Products', url: '/seller/products', icon: Package, badge: 8 },
+    { title: 'My Products', url: '/seller/products', icon: Package, badge: productCount || undefined },
     { title: 'Add Product', url: '/seller/products/new', icon: PlusCircle },
-    { title: 'Orders', url: '/seller/orders', icon: ShoppingCart, badge: 5 },
+    { title: 'Orders', url: '/seller/orders', icon: ShoppingCart, badge: orderCount || undefined },
   ];
 
   const businessItems = [
