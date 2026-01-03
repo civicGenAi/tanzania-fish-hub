@@ -1,59 +1,78 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Fish, Mail, Lock, Phone, User, ArrowRight, Store, Truck, Building2 } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Fish, Mail, Lock, ArrowRight, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
-
-type UserType = 'customer' | 'seller' | 'distributor';
 
 const LoginPage: React.FC = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [userType, setUserType] = useState<UserType>('customer');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');
-  const [name, setName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
-  const { login } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+
+  const { signIn } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const userTypes = [
-    { id: 'customer' as UserType, label: 'Customer', sublabel: 'Buy fresh fish', icon: User },
-    { id: 'seller' as UserType, label: 'Seller', sublabel: 'Sell your catch', icon: Store },
-    { id: 'distributor' as UserType, label: 'Distributor', sublabel: 'Deliver orders', icon: Truck },
-  ];
+  // Get redirect path from location state or default to home
+  const from = (location.state as any)?.from?.pathname || '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
+    // Validation
+    if (!email.trim()) {
+      setError('Email is required');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    if (!password) {
+      setError('Password is required');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      await login(email, password, userType);
+      await signIn(email, password);
+
       toast({
-        title: isLogin ? 'Welcome back!' : 'Account created!',
-        description: `You're now logged in as a ${userType}.`,
+        title: 'Welcome back!',
+        description: 'You have successfully signed in.',
       });
-      
-      // Redirect based on user type
-      switch (userType) {
-        case 'seller':
-          navigate('/seller');
-          break;
-        case 'distributor':
-          navigate('/distributor');
-          break;
-        default:
-          navigate('/dashboard');
+
+      // Redirect will happen automatically via AuthContext and ProtectedRoute
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      console.error('Login error:', err);
+
+      // Handle specific error messages
+      let errorMessage = 'Something went wrong. Please try again.';
+
+      if (err.message?.includes('Invalid login credentials')) {
+        errorMessage = 'Invalid email or password. Please try again.';
+      } else if (err.message?.includes('Email not confirmed')) {
+        errorMessage = 'Please verify your email address before logging in.';
+      } else if (err.message?.includes('suspended')) {
+        errorMessage = 'Your account has been suspended. Please contact support.';
+      } else if (err.message?.includes('Profile not found')) {
+        errorMessage = 'Account profile not found. Please contact support.';
       }
-    } catch {
+
+      setError(errorMessage);
       toast({
         title: 'Error',
-        description: 'Something went wrong. Please try again.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -72,70 +91,30 @@ const LoginPage: React.FC = () => {
               <Fish className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              FishHappy
+              Tanzania Fish Hub
             </span>
           </Link>
 
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-2xl md:text-3xl font-bold mb-2">
-              {isLogin ? 'Welcome back!' : 'Create your account'}
+              Welcome back!
             </h1>
             <p className="text-muted-foreground">
-              {isLogin 
-                ? 'Sign in to access your dashboard' 
-                : 'Join Tanzania\'s largest fish marketplace'}
+              Sign in to access your dashboard
             </p>
           </div>
 
-          {/* User Type Selection (for signup) */}
-          {!isLogin && (
-            <div className="mb-6">
-              <label className="text-sm font-medium mb-3 block">I want to:</label>
-              <div className="grid grid-cols-3 gap-3">
-                {userTypes.map((type) => (
-                  <button
-                    key={type.id}
-                    type="button"
-                    onClick={() => setUserType(type.id)}
-                    className={cn(
-                      "p-4 rounded-xl border-2 transition-all text-center",
-                      userType === type.id
-                        ? "border-primary bg-ocean-light"
-                        : "border-border hover:border-primary/50"
-                    )}
-                  >
-                    <type.icon className={cn(
-                      "h-6 w-6 mx-auto mb-2",
-                      userType === type.id ? "text-primary" : "text-muted-foreground"
-                    )} />
-                    <p className="font-medium text-sm">{type.label}</p>
-                    <p className="text-xs text-muted-foreground">{type.sublabel}</p>
-                  </button>
-                ))}
-              </div>
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-800">{error}</p>
             </div>
           )}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div>
-                <label className="text-sm font-medium mb-2 block">Full Name</label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="Enter your name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="pl-10 h-12"
-                    required
-                  />
-                </div>
-              </div>
-            )}
-
             <div>
               <label className="text-sm font-medium mb-2 block">Email</label>
               <div className="relative">
@@ -144,91 +123,78 @@ const LoginPage: React.FC = () => {
                   type="email"
                   placeholder="Enter your email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (error) setError(null);
+                  }}
                   className="pl-10 h-12"
+                  disabled={isLoading}
                   required
                 />
               </div>
             </div>
-
-            {!isLogin && (
-              <div>
-                <label className="text-sm font-medium mb-2 block">Phone Number</label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    type="tel"
-                    placeholder="+255 7XX XXX XXX"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="pl-10 h-12"
-                    required
-                  />
-                </div>
-              </div>
-            )}
 
             <div>
               <label className="text-sm font-medium mb-2 block">Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="Enter your password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 h-12"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (error) setError(null);
+                  }}
+                  className="pl-10 pr-10 h-12"
+                  disabled={isLoading}
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  disabled={isLoading}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
             </div>
 
-            {isLogin && (
-              <div className="flex justify-end">
-                <button type="button" className="text-sm text-primary hover:underline">
-                  Forgot password?
-                </button>
-              </div>
-            )}
+            <div className="flex justify-end">
+              <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                Forgot password?
+              </Link>
+            </div>
 
             <Button variant="ocean" size="lg" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
-              <ArrowRight className="h-5 w-5" />
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  Sign In
+                  <ArrowRight className="h-5 w-5" />
+                </>
+              )}
             </Button>
           </form>
 
-          {/* Demo Login Shortcuts */}
-          <div className="mt-6 pt-6 border-t border-border">
-            <p className="text-xs text-muted-foreground mb-3 text-center">Quick demo login:</p>
-            <div className="flex gap-2">
-              {userTypes.map((type) => (
-                <Button
-                  key={type.id}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 text-xs"
-                  onClick={() => {
-                    login('demo@example.com', 'demo', type.id);
-                    toast({ title: `Logged in as ${type.label}` });
-                    navigate(type.id === 'customer' ? '/dashboard' : `/${type.id}`);
-                  }}
-                >
-                  {type.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Toggle */}
+          {/* Sign Up Link */}
           <p className="text-center mt-6 text-muted-foreground">
-            {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
+            Don't have an account?{' '}
+            <Link
+              to="/signup"
               className="text-primary font-medium hover:underline"
             >
-              {isLogin ? 'Sign up' : 'Sign in'}
-            </button>
+              Sign up
+            </Link>
           </p>
         </div>
       </div>

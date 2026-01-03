@@ -10,11 +10,13 @@ import Marketplace from "./pages/Marketplace";
 import FishDetail from "./pages/FishDetail";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Help from "./pages/Help";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Dashboard from "./pages/Dashboard";
+import { ProtectedRoute, GuestRoute } from "./components/ProtectedRoute";
 import SellerDashboard from "./pages/SellerDashboard";
 import DistributorDashboard from "./pages/DistributorDashboard";
 import NotFound from "./pages/NotFound";
@@ -83,58 +85,66 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
+              {/* Public Routes */}
               <Route path="/" element={<Index />} />
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/fish/:id" element={<FishDetail />} />
               <Route path="/cart" element={<Cart />} />
-              <Route path="/login" element={<Login />} />
               <Route path="/help" element={<Help />} />
               <Route path="/about" element={<About />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:id" element={<BlogPost />} />
 
-              {/* Customer Dashboard Routes */}
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/dashboard/orders" element={<CustomerOrders />} />
-              <Route path="/dashboard/history" element={<CustomerHistory />} />
-              <Route path="/dashboard/favorites" element={<CustomerFavorites />} />
-              <Route path="/dashboard/addresses" element={<CustomerAddresses />} />
-              <Route path="/dashboard/payments" element={<CustomerPayments />} />
-              <Route path="/dashboard/notifications" element={<CustomerNotifications />} />
-              <Route path="/dashboard/rewards" element={<CustomerRewards />} />
-              <Route path="/dashboard/settings" element={<CustomerSettings />} />
+              {/* Auth Routes - Redirect to dashboard if already logged in */}
+              <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
+              <Route path="/signup" element={<GuestRoute><Signup /></GuestRoute>} />
 
-              {/* Seller Dashboard Routes */}
-              <Route path="/seller" element={<SellerDashboard />} />
-              <Route path="/seller/products" element={<SellerProducts />} />
-              <Route path="/seller/products/new" element={<SellerNewProduct />} />
-              <Route path="/seller/orders" element={<SellerOrders />} />
-              <Route path="/seller/analytics" element={<SellerAnalytics />} />
-              <Route path="/seller/earnings" element={<SellerEarnings />} />
-              <Route path="/seller/customers" element={<SellerCustomers />} />
-              <Route path="/seller/reviews" element={<SellerReviews />} />
-              <Route path="/seller/deliveries" element={<SellerDeliveries />} />
-              <Route path="/seller/messages" element={<SellerMessages />} />
-              <Route path="/seller/notifications" element={<SellerNotifications />} />
-              <Route path="/seller/new-product" element={<SellerNewProduct />} />
-              <Route path="/seller/settings" element={<SellerSettings />} />
+              {/* Customer Dashboard Routes - Protected */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute allowedRoles={['customer']}>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard/orders" element={<ProtectedRoute allowedRoles={['customer']}><CustomerOrders /></ProtectedRoute>} />
+              <Route path="/dashboard/history" element={<ProtectedRoute allowedRoles={['customer']}><CustomerHistory /></ProtectedRoute>} />
+              <Route path="/dashboard/favorites" element={<ProtectedRoute allowedRoles={['customer']}><CustomerFavorites /></ProtectedRoute>} />
+              <Route path="/dashboard/addresses" element={<ProtectedRoute allowedRoles={['customer']}><CustomerAddresses /></ProtectedRoute>} />
+              <Route path="/dashboard/payments" element={<ProtectedRoute allowedRoles={['customer']}><CustomerPayments /></ProtectedRoute>} />
+              <Route path="/dashboard/notifications" element={<ProtectedRoute allowedRoles={['customer']}><CustomerNotifications /></ProtectedRoute>} />
+              <Route path="/dashboard/rewards" element={<ProtectedRoute allowedRoles={['customer']}><CustomerRewards /></ProtectedRoute>} />
+              <Route path="/dashboard/settings" element={<ProtectedRoute allowedRoles={['customer']}><CustomerSettings /></ProtectedRoute>} />
 
-              {/* Distributor Dashboard Routes */}
-              <Route path="/distributor" element={<DistributorDashboard />} />
-              <Route path="/distributor/queue" element={<DistributorQueue />} />
-              <Route path="/distributor/active" element={<DistributorActive />} />
-              <Route path="/distributor/map" element={<DistributorMap />} />
-              <Route path="/distributor/schedule" element={<DistributorSchedule />} />
-              <Route path="/distributor/pickups" element={<DistributorPickups />} />
-              <Route path="/distributor/completed" element={<DistributorCompleted />} />
-              <Route path="/distributor/history" element={<DistributorHistory />} />
-              <Route path="/distributor/earnings" element={<DistributorEarnings />} />
-              <Route path="/distributor/support" element={<DistributorSupport />} />
-              <Route path="/distributor/notifications" element={<DistributorNotifications />} />
-              <Route path="/distributor/settings" element={<DistributorSettings />} />
+              {/* Seller Dashboard Routes - Protected */}
+              <Route path="/seller" element={<ProtectedRoute allowedRoles={['seller']}><SellerDashboard /></ProtectedRoute>} />
+              <Route path="/seller/products" element={<ProtectedRoute allowedRoles={['seller']}><SellerProducts /></ProtectedRoute>} />
+              <Route path="/seller/products/new" element={<ProtectedRoute allowedRoles={['seller']}><SellerNewProduct /></ProtectedRoute>} />
+              <Route path="/seller/orders" element={<ProtectedRoute allowedRoles={['seller']}><SellerOrders /></ProtectedRoute>} />
+              <Route path="/seller/analytics" element={<ProtectedRoute allowedRoles={['seller']}><SellerAnalytics /></ProtectedRoute>} />
+              <Route path="/seller/earnings" element={<ProtectedRoute allowedRoles={['seller']}><SellerEarnings /></ProtectedRoute>} />
+              <Route path="/seller/customers" element={<ProtectedRoute allowedRoles={['seller']}><SellerCustomers /></ProtectedRoute>} />
+              <Route path="/seller/reviews" element={<ProtectedRoute allowedRoles={['seller']}><SellerReviews /></ProtectedRoute>} />
+              <Route path="/seller/deliveries" element={<ProtectedRoute allowedRoles={['seller']}><SellerDeliveries /></ProtectedRoute>} />
+              <Route path="/seller/messages" element={<ProtectedRoute allowedRoles={['seller']}><SellerMessages /></ProtectedRoute>} />
+              <Route path="/seller/notifications" element={<ProtectedRoute allowedRoles={['seller']}><SellerNotifications /></ProtectedRoute>} />
+              <Route path="/seller/new-product" element={<ProtectedRoute allowedRoles={['seller']}><SellerNewProduct /></ProtectedRoute>} />
+              <Route path="/seller/settings" element={<ProtectedRoute allowedRoles={['seller']}><SellerSettings /></ProtectedRoute>} />
 
-              {/* Admin Dashboard Routes */}
-              <Route path="/admin" element={<AdminDashboard />}>
+              {/* Distributor Dashboard Routes - Protected */}
+              <Route path="/distributor" element={<ProtectedRoute allowedRoles={['distributor']}><DistributorDashboard /></ProtectedRoute>} />
+              <Route path="/distributor/queue" element={<ProtectedRoute allowedRoles={['distributor']}><DistributorQueue /></ProtectedRoute>} />
+              <Route path="/distributor/active" element={<ProtectedRoute allowedRoles={['distributor']}><DistributorActive /></ProtectedRoute>} />
+              <Route path="/distributor/map" element={<ProtectedRoute allowedRoles={['distributor']}><DistributorMap /></ProtectedRoute>} />
+              <Route path="/distributor/schedule" element={<ProtectedRoute allowedRoles={['distributor']}><DistributorSchedule /></ProtectedRoute>} />
+              <Route path="/distributor/pickups" element={<ProtectedRoute allowedRoles={['distributor']}><DistributorPickups /></ProtectedRoute>} />
+              <Route path="/distributor/completed" element={<ProtectedRoute allowedRoles={['distributor']}><DistributorCompleted /></ProtectedRoute>} />
+              <Route path="/distributor/history" element={<ProtectedRoute allowedRoles={['distributor']}><DistributorHistory /></ProtectedRoute>} />
+              <Route path="/distributor/earnings" element={<ProtectedRoute allowedRoles={['distributor']}><DistributorEarnings /></ProtectedRoute>} />
+              <Route path="/distributor/support" element={<ProtectedRoute allowedRoles={['distributor']}><DistributorSupport /></ProtectedRoute>} />
+              <Route path="/distributor/notifications" element={<ProtectedRoute allowedRoles={['distributor']}><DistributorNotifications /></ProtectedRoute>} />
+              <Route path="/distributor/settings" element={<ProtectedRoute allowedRoles={['distributor']}><DistributorSettings /></ProtectedRoute>} />
+
+              {/* Admin Dashboard Routes - Protected */}
+              <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>}>
                 <Route index element={<Overview />} />
                 <Route path="analytics" element={<Analytics />} />
                 <Route path="orders" element={<Orders />} />
