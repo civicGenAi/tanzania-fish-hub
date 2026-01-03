@@ -117,18 +117,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Sign up function
+  // Sign up function - Only creates auth user, profile created on first login
   const signUp = async (email: string, password: string, userData: SignUpData): Promise<void> => {
     try {
       setLoading(true);
 
-      // Create auth user
+      // Create auth user with metadata - DO NOT create profile yet
+      // Profile will be created after email confirmation on first login
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             full_name: userData.full_name,
+            phone: userData.phone || null,
             user_type: userData.user_type
           }
         }
@@ -137,12 +139,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
       if (!data.user) throw new Error('User creation failed');
 
-      // Create profile
-      await createProfile(data.user.id, email, userData);
-
-      // Fetch the created profile
-      const userProfile = await fetchProfile(data.user.id);
-      setProfile(userProfile);
+      // DO NOT create profile here - wait for email confirmation
+      // User must confirm email before logging in
 
     } catch (error) {
       console.error('Sign up error:', error);
@@ -152,7 +150,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Sign in function
+  // Sign in function - Creates profile on first login if it doesn't exist
   const signIn = async (email: string, password: string): Promise<void> => {
     try {
       setLoading(true);
@@ -165,13 +163,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
       if (!data.user) throw new Error('Login failed');
 
-      // Fetch user profile
-      const userProfile = await fetchProfile(data.user.id);
+      // Try to fetch existing profile
+      let userProfile = await fetchProfile(data.user.id);
 
+      // If profile doesn't exist, create it from user metadata (first login after email confirmation)
       if (!userProfile) {
-        throw new Error('Profile not found. Please contact support.');
+        const metadata = data.user.user_metadata;
+
+        if (!metadata || !metadata.user_type) {
+          throw new Error('User metadata not found. Please contact support.');
+        }
+
+        // Create profile from metadata
+        await createProfile(data.user.id, data.user.email!, {
+          full_name: metadata.full_name || '',
+          phone: metadata.phone || undefined,
+          user_type: metadata.user_type as UserType
+        });
+
+        // Fetch the newly created profile
+        userProfile = await fetchProfile(data.user.id);
+
+        if (!userProfile) {
+          throw new Error('Failed to create profile. Please contact support.');
+        }
       }
 
+      // Check if account is suspended
       if (userProfile.status === 'suspended') {
         await supabase.auth.signOut();
         throw new Error('Your account has been suspended. Please contact support.');
