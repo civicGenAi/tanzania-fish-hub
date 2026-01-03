@@ -26,7 +26,7 @@ import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
 const SellerSidebar: React.FC = () => {
-  const { user, profile, logout } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { state } = useSidebar();
@@ -69,9 +69,13 @@ const SellerSidebar: React.FC = () => {
     fetchCounts();
   }, [profile]);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const mainNavItems = [

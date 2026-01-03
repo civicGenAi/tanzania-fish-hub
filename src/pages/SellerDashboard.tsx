@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Package, DollarSign, Star, TrendingUp, Plus, Edit, Trash2,
-  Eye, EyeOff, BarChart3, Users, ArrowUpRight, ArrowDownRight, Loader2
+  Eye, EyeOff, BarChart3, Users, ArrowUpRight, ArrowDownRight, Loader2, ShoppingCart
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import SellerSidebar from '@/components/dashboard/SellerSidebar';
@@ -138,10 +139,12 @@ const SellerDashboard: React.FC = () => {
               </button>
             ))}
             <div className="ml-auto px-2">
-              <Button variant="ocean" size="sm">
-                <Plus className="h-4 w-4" />
-                Add Product
-              </Button>
+              <Link to="/seller/products/new">
+                <Button variant="ocean" size="sm">
+                  <Plus className="h-4 w-4" />
+                  Add Product
+                </Button>
+              </Link>
             </div>
           </div>
 
@@ -204,13 +207,13 @@ const SellerDashboard: React.FC = () => {
                     })}
                 
                 {/* Add Product Card */}
-                <button className="bg-muted/30 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center p-8 hover:border-primary hover:bg-ocean-light/30 transition-all min-h-[200px]">
+                <Link to="/seller/products/new" className="bg-muted/30 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center p-8 hover:border-primary hover:bg-ocean-light/30 transition-all min-h-[200px]">
                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
                     <Plus className="h-6 w-6 text-primary" />
                   </div>
                   <p className="font-medium">Add New Product</p>
                   <p className="text-sm text-muted-foreground">List your fresh catch</p>
-                </button>
+                </Link>
               </div>
             )}
 
