@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, UserType } from '@/contexts/AuthContext';
-import { Fish, Mail, Lock, User, Phone, Briefcase } from 'lucide-react';
+import { Fish, Mail, Lock, User, Phone, Briefcase, ArrowRight, Eye, EyeOff, AlertCircle, CheckCircle2, Store, Truck } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 const Signup = () => {
   const navigate = useNavigate();
   const { signUp } = useAuth();
+  const { toast } = useToast();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -16,6 +21,8 @@ const Signup = () => {
     user_type: 'customer' as UserType
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
@@ -30,13 +37,13 @@ const Signup = () => {
       value: 'seller' as UserType,
       label: 'Seller',
       description: 'Sell your fish products',
-      icon: Briefcase
+      icon: Store
     },
     {
       value: 'distributor' as UserType,
       label: 'Distributor',
       description: 'Deliver products to customers',
-      icon: Fish
+      icon: Truck
     }
   ];
 
@@ -86,12 +93,38 @@ const Signup = () => {
         user_type: formData.user_type
       });
 
-      // Show success message
-      alert('Account created successfully! Please check your email to verify your account.');
-      navigate('/login');
+      // Show success toast
+      toast({
+        title: 'Account created successfully!',
+        description: 'Please check your email inbox to confirm your account before logging in.',
+        duration: 8000,
+      });
+
+      // Redirect to login page
+      navigate('/login', {
+        state: {
+          message: 'Please check your email and confirm your account before logging in.'
+        }
+      });
     } catch (error: any) {
+      console.error('Signup error:', error);
+
+      let errorMessage = 'Failed to create account. Please try again.';
+
+      if (error.message?.includes('already registered')) {
+        errorMessage = 'This email is already registered. Please login instead.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       setErrors({
-        submit: error.message || 'Failed to create account. Please try again.'
+        submit: errorMessage
+      });
+
+      toast({
+        title: 'Signup failed',
+        description: errorMessage,
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -113,63 +146,65 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl w-full">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-            <Fish className="h-10 w-10 text-blue-600" />
-            <span className="text-2xl font-bold text-gray-900">Tanzania Fish Hub</span>
+    <div className="min-h-screen flex">
+      {/* Left Panel - Form */}
+      <div className="flex-1 flex items-center justify-center p-6 md:p-12">
+        <div className="w-full max-w-lg">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2 mb-8">
+            <div className="ocean-gradient p-2 rounded-xl">
+              <Fish className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Tanzania Fish Hub
+            </span>
           </Link>
-          <h2 className="text-3xl font-extrabold text-gray-900">Create your account</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-              Sign in
-            </Link>
-          </p>
-        </div>
 
-        {/* Form */}
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">
+              Create your account
+            </h1>
+            <p className="text-muted-foreground">
+              Join Tanzania's largest fish marketplace
+            </p>
+          </div>
+
+          {/* Error Message */}
+          {errors.submit && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-800">{errors.submit}</p>
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* User Type Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                I want to join as a
-              </label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <label className="text-sm font-medium mb-3 block">I want to join as:</label>
+              <div className="grid grid-cols-3 gap-3">
                 {userTypes.map((type) => {
                   const Icon = type.icon;
                   return (
-                    <label
+                    <button
                       key={type.value}
-                      className={`relative flex flex-col items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      type="button"
+                      onClick={() => setFormData({ ...formData, user_type: type.value })}
+                      className={cn(
+                        "p-4 rounded-xl border-2 transition-all text-center",
                         formData.user_type === type.value
-                          ? 'border-blue-600 bg-blue-50'
-                          : 'border-gray-200 hover:border-blue-300'
-                      }`}
+                          ? "border-primary bg-ocean-light"
+                          : "border-border hover:border-primary/50"
+                      )}
                     >
-                      <input
-                        type="radio"
-                        name="user_type"
-                        value={type.value}
-                        checked={formData.user_type === type.value}
-                        onChange={(e) => setFormData({ ...formData, user_type: e.target.value as UserType })}
-                        className="sr-only"
-                      />
-                      <Icon className={`h-8 w-8 mb-2 ${
-                        formData.user_type === type.value ? 'text-blue-600' : 'text-gray-400'
-                      }`} />
-                      <span className={`font-medium ${
-                        formData.user_type === type.value ? 'text-blue-600' : 'text-gray-900'
-                      }`}>
-                        {type.label}
-                      </span>
-                      <span className="text-xs text-gray-500 text-center mt-1">
-                        {type.description}
-                      </span>
-                    </label>
+                      <Icon className={cn(
+                        "h-6 w-6 mx-auto mb-2",
+                        formData.user_type === type.value ? "text-primary" : "text-muted-foreground"
+                      )} />
+                      <p className="font-medium text-sm">{type.label}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{type.description}</p>
+                    </button>
                   );
                 })}
               </div>
@@ -177,23 +212,24 @@ const Signup = () => {
 
             {/* Full Name */}
             <div>
-              <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
-                Full Name *
+              <label htmlFor="full_name" className="text-sm font-medium mb-2 block">
+                Full Name
               </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
                   id="full_name"
                   name="full_name"
                   type="text"
                   value={formData.full_name}
-                  onChange={handleChange}
-                  className={`appearance-none block w-full pl-10 pr-3 py-2 border ${
-                    errors.full_name ? 'border-red-300' : 'border-gray-300'
-                  } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (errors.full_name) setErrors({ ...errors, full_name: '' });
+                  }}
+                  className="pl-10 h-12"
                   placeholder="John Doe"
+                  disabled={loading}
+                  required
                 />
               </div>
               {errors.full_name && (
@@ -203,24 +239,24 @@ const Signup = () => {
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email Address *
+              <label htmlFor="email" className="text-sm font-medium mb-2 block">
+                Email Address
               </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
                   id="email"
                   name="email"
                   type="email"
-                  autoComplete="email"
                   value={formData.email}
-                  onChange={handleChange}
-                  className={`appearance-none block w-full pl-10 pr-3 py-2 border ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
-                  } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (errors.email) setErrors({ ...errors, email: '' });
+                  }}
+                  className="pl-10 h-12"
                   placeholder="you@example.com"
+                  disabled={loading}
+                  required
                 />
               </div>
               {errors.email && (
@@ -230,23 +266,23 @@ const Signup = () => {
 
             {/* Phone */}
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="phone" className="text-sm font-medium mb-2 block">
                 Phone Number (Optional)
               </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Phone className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
                   id="phone"
                   name="phone"
                   type="tel"
                   value={formData.phone}
-                  onChange={handleChange}
-                  className={`appearance-none block w-full pl-10 pr-3 py-2 border ${
-                    errors.phone ? 'border-red-300' : 'border-gray-300'
-                  } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (errors.phone) setErrors({ ...errors, phone: '' });
+                  }}
+                  className="pl-10 h-12"
                   placeholder="+255 712 345 678"
+                  disabled={loading}
                 />
               </div>
               {errors.phone && (
@@ -256,25 +292,37 @@ const Signup = () => {
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password *
+              <label htmlFor="password" className="text-sm font-medium mb-2 block">
+                Password
               </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
                   id="password"
                   name="password"
-                  type="password"
-                  autoComplete="new-password"
+                  type={showPassword ? 'text' : 'password'}
                   value={formData.password}
-                  onChange={handleChange}
-                  className={`appearance-none block w-full pl-10 pr-3 py-2 border ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
-                  } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (errors.password) setErrors({ ...errors, password: '' });
+                  }}
+                  className="pl-10 pr-10 h-12"
                   placeholder="••••••••"
+                  disabled={loading}
+                  required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  disabled={loading}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password}</p>
@@ -283,69 +331,114 @@ const Signup = () => {
 
             {/* Confirm Password */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password *
+              <label htmlFor="confirmPassword" className="text-sm font-medium mb-2 block">
+                Confirm Password
               </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type="password"
-                  autoComplete="new-password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className={`appearance-none block w-full pl-10 pr-3 py-2 border ${
-                    errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
-                  } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: '' });
+                  }}
+                  className="pl-10 pr-10 h-12"
                   placeholder="••••••••"
+                  disabled={loading}
+                  required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  disabled={loading}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
               {errors.confirmPassword && (
                 <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
               )}
             </div>
 
-            {/* Submit Error */}
-            {errors.submit && (
-              <div className="rounded-md bg-red-50 p-4">
-                <p className="text-sm text-red-800">{errors.submit}</p>
-              </div>
-            )}
-
             {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <Button variant="ocean" size="lg" className="w-full" disabled={loading}>
               {loading ? (
                 <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
                   Creating account...
                 </>
               ) : (
-                'Create Account'
+                <>
+                  Create Account
+                  <ArrowRight className="h-5 w-5" />
+                </>
               )}
-            </button>
+            </Button>
           </form>
 
-          {/* Terms */}
-          <p className="mt-6 text-xs text-center text-gray-500">
-            By signing up, you agree to our{' '}
-            <a href="#" className="text-blue-600 hover:text-blue-500">
-              Terms of Service
-            </a>{' '}
-            and{' '}
-            <a href="#" className="text-blue-600 hover:text-blue-500">
-              Privacy Policy
-            </a>
+          {/* Sign In Link */}
+          <p className="text-center mt-6 text-muted-foreground">
+            Already have an account?{' '}
+            <Link
+              to="/login"
+              className="text-primary font-medium hover:underline"
+            >
+              Sign in
+            </Link>
           </p>
+
+          {/* Terms */}
+          <p className="mt-4 text-xs text-center text-muted-foreground">
+            By signing up, you agree to our{' '}
+            <Link to="/terms" className="text-primary hover:underline">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link to="/privacy" className="text-primary hover:underline">
+              Privacy Policy
+            </Link>
+          </p>
+        </div>
+      </div>
+
+      {/* Right Panel - Visual */}
+      <div className="hidden lg:flex flex-1 ocean-gradient relative overflow-hidden items-center justify-center p-12">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50" />
+
+        <div className="relative text-center text-primary-foreground max-w-lg">
+          <div className="mb-8">
+            <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+              <Fish className="h-12 w-12 animate-float" />
+            </div>
+          </div>
+          <h2 className="text-3xl font-bold mb-4">
+            Join Tanzania's Fish Marketplace
+          </h2>
+          <p className="text-primary-foreground/90 text-lg mb-8">
+            Connect with fishermen, buyers, and distributors across Tanzania.
+            Start your journey today!
+          </p>
+
+          <div className="grid grid-cols-3 gap-6 pt-8 border-t border-primary-foreground/20">
+            {[
+              { icon: User, label: 'Customers' },
+              { icon: Store, label: 'Sellers' },
+              { icon: Truck, label: 'Distributors' },
+            ].map((item, index) => (
+              <div key={index} className="flex flex-col items-center">
+                <item.icon className="h-8 w-8 mb-2" />
+                <p className="text-sm text-primary-foreground/80">{item.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
