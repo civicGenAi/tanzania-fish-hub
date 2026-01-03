@@ -286,7 +286,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         console.log('Auth event:', event);
 
-        // Only handle specific events to avoid infinite loops
+        // Handle all auth events to ensure loading is always set to false
         if (event === 'SIGNED_OUT') {
           setSession(null);
           setUser(null);
@@ -297,6 +297,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(session?.user ?? null);
 
           if (session?.user) {
+            const userProfile = await fetchProfile(session.user.id);
+            if (mounted) {
+              setProfile(userProfile);
+            }
+          }
+          setLoading(false);
+        } else {
+          // Handle other events (INITIAL_SESSION, USER_UPDATED, etc.)
+          setSession(session);
+          setUser(session?.user ?? null);
+
+          if (session?.user && !profile) {
             const userProfile = await fetchProfile(session.user.id);
             if (mounted) {
               setProfile(userProfile);

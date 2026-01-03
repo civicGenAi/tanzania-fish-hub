@@ -19,6 +19,7 @@ const SellerNewProduct: React.FC = () => {
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [sellerId, setSellerId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -37,8 +38,13 @@ const SellerNewProduct: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setInitialLoading(true);
+
         // Get seller ID
-        if (!profile) return;
+        if (!profile) {
+          setInitialLoading(false);
+          return;
+        }
 
         const { data: sellerProfile, error: sellerError } = await supabase
           .from('seller_profiles')
@@ -59,6 +65,8 @@ const SellerNewProduct: React.FC = () => {
           description: 'Failed to load form data',
           variant: 'destructive',
         });
+      } finally {
+        setInitialLoading(false);
       }
     };
 
@@ -112,11 +120,19 @@ const SellerNewProduct: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please fill in all required fields correctly',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (!sellerId) {
       toast({
         title: 'Error',
-        description: 'Seller profile not found',
+        description: 'Seller profile not found. Please try refreshing the page.',
         variant: 'destructive',
       });
       return;
@@ -369,12 +385,17 @@ const SellerNewProduct: React.FC = () => {
               type="submit"
               variant="ocean"
               className="flex-1"
-              disabled={loading}
+              disabled={loading || initialLoading || !sellerId}
             >
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Creating...
+                </>
+              ) : initialLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Loading...
                 </>
               ) : (
                 'Create Product'
