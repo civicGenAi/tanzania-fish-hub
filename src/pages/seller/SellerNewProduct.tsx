@@ -129,8 +129,17 @@ const SellerNewProduct: React.FC = () => {
 
       // Upload image if provided
       if (imageFile) {
-        const tempId = `temp-${Date.now()}`;
-        imageUrl = await productsService.uploadProductImage(imageFile, tempId);
+        try {
+          const tempId = `temp-${Date.now()}`;
+          imageUrl = await productsService.uploadProductImage(imageFile, tempId);
+        } catch (uploadError) {
+          console.error('Error uploading image:', uploadError);
+          toast({
+            title: 'Warning',
+            description: 'Product will be created without image. Please create "product-images" bucket in Supabase Storage.',
+            variant: 'default',
+          });
+        }
       }
 
       // Create product
@@ -147,7 +156,7 @@ const SellerNewProduct: React.FC = () => {
 
       toast({
         title: 'Success',
-        description: 'Product created successfully',
+        description: imageUrl ? 'Product created successfully' : 'Product created successfully (without image)',
       });
 
       navigate('/seller/products');
