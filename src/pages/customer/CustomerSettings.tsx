@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 
 const CustomerSettings: React.FC = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   const settingsGroups = [
     {
@@ -38,10 +38,10 @@ const CustomerSettings: React.FC = () => {
         <div className="bg-card border border-border rounded-2xl p-6">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-16 h-16 rounded-full ocean-gradient flex items-center justify-center text-primary-foreground text-2xl font-bold">
-              {user?.name?.charAt(0) || 'U'}
+              {profile?.full_name?.charAt(0) || 'U'}
             </div>
             <div>
-              <h2 className="text-xl font-semibold">{user?.name}</h2>
+              <h2 className="text-xl font-semibold">{profile?.full_name || 'Customer'}</h2>
               <p className="text-muted-foreground">{user?.email}</p>
               <p className="text-sm text-muted-foreground">{user?.phone}</p>
             </div>
