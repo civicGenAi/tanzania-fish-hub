@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { Star, MapPin, Plus, Check, ShoppingCart } from 'lucide-react';
 import { Fish, formatTZS } from '@/data/fishData';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/contexts/CartContext';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface FishCardProps {
   fish: Fish;
@@ -12,13 +12,13 @@ interface FishCardProps {
 }
 
 const FishCard: React.FC<FishCardProps> = ({ fish, variant = 'default' }) => {
-  const { items, addToCart } = useCart();
-  const isInCart = items.some((item) => item.fish.id === fish.id);
+  const [isInCart, setIsInCart] = React.useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(fish);
+    setIsInCart(true);
+    toast.success(`${fish.name} added to cart`);
   };
 
   if (variant === 'compact') {

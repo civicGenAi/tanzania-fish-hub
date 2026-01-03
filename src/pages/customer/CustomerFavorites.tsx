@@ -4,11 +4,14 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import CustomerSidebar from '@/components/dashboard/CustomerSidebar';
 import { Button } from '@/components/ui/button';
 import { sampleFish, formatTZS } from '@/data/fishData';
-import { useCart } from '@/contexts/CartContext';
+import { toast } from 'sonner';
 
 const CustomerFavorites: React.FC = () => {
-  const { addToCart } = useCart();
   const favorites = sampleFish.slice(0, 5);
+
+  const handleAddToCart = (fishName: string) => {
+    toast.success(`${fishName} added to cart`);
+  };
 
   return (
     <DashboardLayout 
@@ -54,7 +57,7 @@ const CustomerFavorites: React.FC = () => {
                     size="sm" 
                     className="flex-1"
                     disabled={!fish.inStock}
-                    onClick={() => addToCart(fish, 1)}
+                    onClick={() => handleAddToCart(fish.name)}
                   >
                     <ShoppingCart className="h-4 w-4" />
                     Add to Cart

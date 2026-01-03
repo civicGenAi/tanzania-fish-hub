@@ -125,11 +125,11 @@ const SellerSidebar: React.FC = () => {
             collapsed && "justify-center"
           )}>
             <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground font-bold shrink-0">
-              {user?.name?.charAt(0) || 'S'}
+              {profile?.full_name?.charAt(0) || 'S'}
             </div>
             {!collapsed && (
               <div className="min-w-0">
-                <p className="font-medium text-sm truncate">{user?.name || 'Seller'}</p>
+                <p className="font-medium text-sm truncate">{profile?.full_name || 'Seller'}</p>
                 <div className="flex items-center gap-1">
                   <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
                   <span className="text-xs text-muted-foreground">4.8 Rating</span>

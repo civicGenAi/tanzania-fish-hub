@@ -11,7 +11,7 @@ import { sampleOrders, formatTZS } from '@/data/fishData';
 import { cn } from '@/lib/utils';
 
 const DistributorDashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [isOnline, setIsOnline] = useState(true);
 
   const activeDeliveries = sampleOrders.filter(o => o.status === 'out_for_delivery');
@@ -74,7 +74,7 @@ const DistributorDashboard: React.FC = () => {
     <DashboardLayout 
       sidebar={<DistributorSidebar />}
       title="Delivery Hub"
-      subtitle={`Welcome, ${user?.name || 'Driver'}`}
+      subtitle={`Welcome, ${profile?.full_name || 'Driver'}`}
     >
       <div className="space-y-6">
         {/* Status Toggle */}

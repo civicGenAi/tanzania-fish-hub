@@ -42,7 +42,7 @@ const HeroSection: React.FC = () => {
     <section 
       ref={heroRef}
       onMouseMove={handleMouseMove}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden cursor-default"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden cursor-default bg-slate-900"
     >
       {/* Video Background with Parallax */}
       <div 
@@ -66,14 +66,9 @@ const HeroSection: React.FC = () => {
           <source src={OCEAN_VIDEO_URL} type="video/mp4" />
         </video>
         
-        {/* Dynamic Gradient Overlay */}
-        <div 
-          className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/30 to-background transition-opacity duration-500"
-          style={{
-            opacity: 0.9 - Math.abs(mousePosition.y) * 0.3,
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/30 via-transparent to-secondary/30 mix-blend-overlay" />
+        {/* Dark Overlay for Readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-secondary/20 mix-blend-overlay" />
         
         {/* Vignette Effect */}
         <div className="absolute inset-0 bg-radial-vignette" />

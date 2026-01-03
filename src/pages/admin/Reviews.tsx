@@ -269,7 +269,7 @@ const Reviews = () => {
                     <div className="flex items-center space-x-2">
                       <p className="font-medium text-gray-900">{review.customer}</p>
                       {review.verified && (
-                        <CheckCircle className="h-4 w-4 text-blue-500" title="Verified Purchase" />
+                        <CheckCircle className="h-4 w-4 text-blue-500" aria-label="Verified Purchase" />
                       )}
                     </div>
                     <p className="text-sm text-gray-500">{review.date}</p>

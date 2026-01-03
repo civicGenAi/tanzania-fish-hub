@@ -6,15 +6,15 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 
 const DistributorSettings: React.FC = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   return (
     <DashboardLayout sidebar={<DistributorSidebar />} title="Settings" subtitle="Manage your account">
       <div className="max-w-3xl space-y-6">
         <div className="bg-card border border-border rounded-2xl p-6">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-accent-foreground text-2xl font-bold">{user?.name?.charAt(0) || 'D'}</div>
-            <div><h2 className="text-xl font-semibold">{user?.name}</h2><p className="text-muted-foreground">{user?.phone}</p></div>
+            <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-accent-foreground text-2xl font-bold">{profile?.full_name?.charAt(0) || 'D'}</div>
+            <div><h2 className="text-xl font-semibold">{profile?.full_name || 'Driver'}</h2><p className="text-muted-foreground">{profile?.phone}</p></div>
           </div>
           <Button variant="outline">Edit Profile</Button>
         </div>

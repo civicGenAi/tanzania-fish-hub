@@ -12,7 +12,7 @@ import { sampleOrders, formatTZS } from '@/data/fishData';
 import { cn } from '@/lib/utils';
 
 const CustomerDashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   const statusConfig = {
     placed: { icon: Package, color: 'text-muted-foreground', bg: 'bg-muted' },
@@ -37,7 +37,7 @@ const CustomerDashboard: React.FC = () => {
   return (
     <DashboardLayout
       sidebar={<CustomerSidebar />}
-      title={`Habari, ${user?.name?.split(' ')[0] || 'Customer'}! 👋`}
+      title={`Habari, ${profile?.full_name?.split(' ')[0] || 'Customer'}! 👋`}
       subtitle="Welcome to your dashboard"
     >
       <div className="space-y-6">
