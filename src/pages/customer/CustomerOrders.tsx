@@ -8,7 +8,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { ordersService } from '@/services/orders.service';
+import { deliveriesService } from '@/services/deliveries.service';
 import { Order } from '@/types/order.types';
+import { Delivery } from '@/types/delivery.types';
 import { cn } from '@/lib/utils';
 
 const CustomerOrders: React.FC = () => {
@@ -19,6 +21,9 @@ const CustomerOrders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [customerId, setCustomerId] = useState<string | null>(null);
+  const [trackingOrderId, setTrackingOrderId] = useState<string | null>(null);
+  const [deliveryInfo, setDeliveryInfo] = useState<Delivery | null>(null);
+  const [loadingDelivery, setLoadingDelivery] = useState(false);
 
   const statusConfig = {
     pending: { icon: Clock, color: 'text-muted-foreground', bg: 'bg-muted', label: 'Pending' },
@@ -78,6 +83,42 @@ const CustomerOrders: React.FC = () => {
       currency: 'TZS',
       minimumFractionDigits: 0,
     }).format(price);
+  };
+
+  const handleTrackDelivery = async (orderId: string) => {
+    try {
+      setLoadingDelivery(true);
+      setTrackingOrderId(orderId);
+
+      const { data, error } = await supabase
+        .from('deliveries')
+        .select('*')
+        .eq('order_id', orderId)
+        .single();
+
+      if (error) throw error;
+      setDeliveryInfo(data);
+    } catch (error) {
+      console.error('Error fetching delivery:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load delivery information',
+        variant: 'destructive',
+      });
+      setTrackingOrderId(null);
+    } finally {
+      setLoadingDelivery(false);
+    }
+  };
+
+  const deliveryStatusConfig = {
+    pending: { label: 'Delivery Pending', color: 'text-muted-foreground' },
+    assigned: { label: 'Assigned to Distributor', color: 'text-primary' },
+    picked_up: { label: 'Picked Up', color: 'text-secondary' },
+    in_transit: { label: 'In Transit', color: 'text-accent' },
+    delivered: { label: 'Delivered', color: 'text-secondary' },
+    failed: { label: 'Delivery Failed', color: 'text-destructive' },
+    cancelled: { label: 'Delivery Cancelled', color: 'text-destructive' },
   };
 
   const filteredOrders = orders.filter(order => {
@@ -177,8 +218,17 @@ const CustomerOrders: React.FC = () => {
                   </div>
                   <div className="flex gap-2">
                     {order.status === 'shipped' && (
-                      <Button variant="ocean" size="sm">
-                        <Truck className="h-4 w-4 mr-2" />
+                      <Button
+                        variant="ocean"
+                        size="sm"
+                        onClick={() => handleTrackDelivery(order.id)}
+                        disabled={loadingDelivery && trackingOrderId === order.id}
+                      >
+                        {loadingDelivery && trackingOrderId === order.id ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Truck className="h-4 w-4 mr-2" />
+                        )}
                         Track Delivery
                       </Button>
                     )}
@@ -189,6 +239,68 @@ const CustomerOrders: React.FC = () => {
                     )}
                   </div>
                 </div>
+
+                {/* Delivery Tracking Info */}
+                {trackingOrderId === order.id && deliveryInfo && (
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <div className="bg-muted/30 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Truck className="h-5 w-5 text-accent" />
+                        <h4 className="font-semibold">Delivery Tracking</h4>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Delivery Number:</span>
+                          <span className="font-medium">{deliveryInfo.delivery_number}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Status:</span>
+                          <span className={cn(
+                            "font-medium capitalize",
+                            deliveryStatusConfig[deliveryInfo.status as keyof typeof deliveryStatusConfig]?.color
+                          )}>
+                            {deliveryStatusConfig[deliveryInfo.status as keyof typeof deliveryStatusConfig]?.label}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Pickup Location:</span>
+                          <span className="font-medium">{deliveryInfo.pickup_location}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Delivery Location:</span>
+                          <span className="font-medium">{deliveryInfo.delivery_location}</span>
+                        </div>
+                        {deliveryInfo.pickup_time && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Picked Up:</span>
+                            <span className="font-medium">
+                              {new Date(deliveryInfo.pickup_time).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                        {deliveryInfo.delivery_time && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Delivered:</span>
+                            <span className="font-medium">
+                              {new Date(deliveryInfo.delivery_time).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full mt-3"
+                        onClick={() => {
+                          setTrackingOrderId(null);
+                          setDeliveryInfo(null);
+                        }}
+                      >
+                        Close
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}

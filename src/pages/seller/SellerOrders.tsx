@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { ordersService } from '@/services/orders.service';
+import { deliveriesService } from '@/services/deliveries.service';
 import { OrderWithDetails, OrderStatus } from '@/types/order.types';
 import { cn } from '@/lib/utils';
 
@@ -79,6 +80,36 @@ const SellerOrders: React.FC = () => {
       toast({
         title: 'Error',
         description: 'Failed to update order status',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleCreateDelivery = async (order: OrderWithDetails) => {
+    try {
+      // Create delivery for the order
+      await deliveriesService.createDelivery({
+        order_id: order.id,
+        pickup_location: 'Seller Location', // TODO: Get from seller profile
+        delivery_location: 'Customer Address', // TODO: Get from order shipping address
+        priority: 'normal',
+      });
+
+      // Update order status to shipped
+      await ordersService.updateOrder(order.id, { status: 'shipped' });
+
+      setOrders(orders.map(o =>
+        o.id === order.id ? { ...o, status: 'shipped' } : o
+      ));
+
+      toast({
+        title: 'Success',
+        description: 'Delivery created and order marked as shipped',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to create delivery',
         variant: 'destructive',
       });
     }
@@ -225,9 +256,9 @@ const SellerOrders: React.FC = () => {
                           <Button
                             variant="ocean"
                             size="sm"
-                            onClick={() => handleStatusUpdate(order.id, 'shipped')}
+                            onClick={() => handleCreateDelivery(order)}
                           >
-                            Mark as Shipped
+                            Create Delivery
                           </Button>
                         )}
                       </div>
