@@ -53,15 +53,22 @@ const SellerSidebar: React.FC = () => {
           setProductCount(products.length);
 
           // Get order count (pending orders) from order_items
+          // Fetch all order items for this seller with order status
           const { data: orderItems } = await supabase
             .from('order_items')
-            .select('order_id, order:orders!inner(status)')
-            .eq('seller_id', sellerProfile.id)
-            .in('order.status', ['pending', 'processing', 'confirmed']);
+            .select('order_id, order:orders(status)')
+            .eq('seller_id', sellerProfile.id);
 
-          // Count unique orders
-          const uniqueOrders = new Set(orderItems?.map(item => (item as any).order_id));
-          setOrderCount(uniqueOrders.size);
+          // Filter for active statuses and count unique orders
+          const activeOrders = new Set(
+            orderItems
+              ?.filter(item => {
+                const status = (item as any).order?.status;
+                return status && ['pending', 'processing', 'confirmed'].includes(status);
+              })
+              .map(item => (item as any).order_id)
+          );
+          setOrderCount(activeOrders.size);
         }
       } catch (error) {
         console.error('Error fetching counts:', error);

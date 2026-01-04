@@ -51,6 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Fetch user profile from database
   const fetchProfile = async (userId: string): Promise<UserProfile | null> => {
     console.log('🔍 [AUTH] Fetching profile for user:', userId);
+    console.log('🔍 [AUTH] Starting Supabase query...');
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -58,17 +59,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', userId)
         .single();
 
+      console.log('🔍 [AUTH] Query completed. Data exists:', !!data, 'Error exists:', !!error);
+      if (error) console.error('🔍 [AUTH] Error code:', error.code, 'Message:', error.message);
+      if (data) console.log('🔍 [AUTH] Data user_type:', (data as any).user_type);
+
       if (error) {
         // If it's a "not found" error, that's expected for new users
         if (error.code === 'PGRST116') {
-          console.log('⚪ [AUTH] Profile not found for user:', userId);
+          console.log('⚪ [AUTH] Profile not found (404) - user needs to complete profile setup');
           return null;
         }
         // For other errors (permissions, network, etc.), throw to be handled by caller
-        console.error('❌ [AUTH] Error fetching profile:', error);
+        console.error('❌ [AUTH] Error fetching profile (non-404):', error);
         throw error;
       }
-      console.log('✅ [AUTH] Profile fetched successfully:', data);
+      console.log('✅ [AUTH] Profile fetched successfully! User type:', (data as UserProfile).user_type);
       return data as UserProfile;
     } catch (error: any) {
       // Only return null for "not found" errors
