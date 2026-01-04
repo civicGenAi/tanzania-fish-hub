@@ -65,7 +65,7 @@ class ProductsService {
           *,
           category:categories(id, name, slug),
           seller:seller_profiles(id, business_name, user_id),
-          variants:product_variants(id, name, price, stock_quantity, sku)
+          variants:product_variants(id, name, price, stock, sku)
         `)
         .eq('id', id)
         .single();
