@@ -134,8 +134,10 @@ const SellerNewProduct: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('🔵 [PRODUCT FORM] Submit started');
 
     if (!validateForm()) {
+      console.log('❌ [PRODUCT FORM] Validation failed');
       toast({
         title: 'Validation Error',
         description: 'Please fill in all required fields correctly',
@@ -143,8 +145,10 @@ const SellerNewProduct: React.FC = () => {
       });
       return;
     }
+    console.log('✅ [PRODUCT FORM] Validation passed');
 
     if (!sellerId) {
+      console.log('❌ [PRODUCT FORM] No seller ID found');
       toast({
         title: 'Error',
         description: 'Seller profile not found. Please try refreshing the page.',
@@ -152,6 +156,7 @@ const SellerNewProduct: React.FC = () => {
       });
       return;
     }
+    console.log('✅ [PRODUCT FORM] Seller ID:', sellerId);
 
     setLoading(true);
 
@@ -160,30 +165,36 @@ const SellerNewProduct: React.FC = () => {
 
       // Upload image if provided
       if (imageFile) {
+        console.log('📸 [PRODUCT FORM] Uploading image...');
         try {
           const tempId = `temp-${Date.now()}`;
           imageUrl = await productsService.uploadProductImage(imageFile, tempId);
+          console.log('✅ [PRODUCT FORM] Image uploaded:', imageUrl);
         } catch (uploadError) {
-          console.error('Error uploading image:', uploadError);
+          console.error('❌ [PRODUCT FORM] Error uploading image:', uploadError);
           toast({
             title: 'Warning',
             description: 'Product will be created without image. Please create "product-images" bucket in Supabase Storage.',
             variant: 'default',
           });
         }
+      } else {
+        console.log('⚪ [PRODUCT FORM] No image to upload');
       }
 
       // Generate slug and SKU
       const slug = formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       const sku = `${slug}-${Date.now()}`.toUpperCase();
+      console.log('🏷️ [PRODUCT FORM] Generated slug:', slug, 'SKU:', sku);
 
       // Convert empty date strings to null
       const harvestDate = formData.harvest_date || null;
       const expiryDate = formData.expiry_date || null;
       const weightPerUnit = formData.weight_per_unit ? parseFloat(formData.weight_per_unit) : null;
+      console.log('📅 [PRODUCT FORM] Dates - harvest:', harvestDate, 'expiry:', expiryDate);
 
       // Create product with enhanced fields as actual columns
-      const product = await productsService.createProduct(sellerId, {
+      const productData = {
         name: formData.name,
         slug,
         sku,
@@ -209,16 +220,22 @@ const SellerNewProduct: React.FC = () => {
         supplier_contact: formData.supplier_contact || undefined,
         quality_grade: formData.quality_grade || undefined,
         product_notes: formData.notes || undefined,
-      });
+      };
+      console.log('📦 [PRODUCT FORM] Product data to create:', productData);
+
+      console.log('🔄 [PRODUCT FORM] Calling createProduct service...');
+      const product = await productsService.createProduct(sellerId, productData);
+      console.log('✅ [PRODUCT FORM] Product created successfully:', product);
 
       toast({
         title: 'Success',
         description: imageUrl ? 'Product created successfully' : 'Product created successfully (without image)',
       });
 
+      console.log('🔄 [PRODUCT FORM] Navigating to products page...');
       navigate('/seller/products');
     } catch (error) {
-      console.error('Error creating product:', error);
+      console.error('❌ [PRODUCT FORM] Error creating product:', error);
       toast({
         title: 'Error',
         description: 'Failed to create product',
@@ -226,6 +243,7 @@ const SellerNewProduct: React.FC = () => {
       });
     } finally {
       setLoading(false);
+      console.log('🏁 [PRODUCT FORM] Submit completed');
     }
   };
 

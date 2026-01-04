@@ -50,6 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Fetch user profile from database
   const fetchProfile = async (userId: string): Promise<UserProfile | null> => {
+    console.log('🔍 [AUTH] Fetching profile for user:', userId);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -60,23 +61,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) {
         // If it's a "not found" error, that's expected for new users
         if (error.code === 'PGRST116') {
-          console.log('Profile not found for user:', userId);
+          console.log('⚪ [AUTH] Profile not found for user:', userId);
           return null;
         }
         // For other errors (permissions, network, etc.), throw to be handled by caller
-        console.error('Error fetching profile:', error);
+        console.error('❌ [AUTH] Error fetching profile:', error);
         throw error;
       }
+      console.log('✅ [AUTH] Profile fetched successfully:', data);
       return data as UserProfile;
     } catch (error: any) {
       // Only return null for "not found" errors
       if (error?.code === 'PGRST116') {
+        console.log('⚪ [AUTH] Profile not found (404)');
         return null;
       }
       // For all other errors, log and return null to avoid breaking auth flow
       // but log it prominently so we can debug
-      console.error('CRITICAL: Profile fetch failed:', error);
+      console.error('❌ [AUTH] CRITICAL: Profile fetch failed:', error);
       // Try one more time after a short delay
+      console.log('🔄 [AUTH] Retrying profile fetch in 1 second...');
       await new Promise(resolve => setTimeout(resolve, 1000));
       try {
         const { data, error: retryError } = await supabase
@@ -86,14 +90,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .single();
 
         if (!retryError && data) {
-          console.log('Profile fetched successfully on retry');
+          console.log('✅ [AUTH] Profile fetched successfully on retry:', data);
           return data as UserProfile;
         }
+        console.error('❌ [AUTH] Retry failed:', retryError);
       } catch (retryErr) {
-        console.error('Profile fetch retry also failed:', retryErr);
+        console.error('❌ [AUTH] Profile fetch retry also failed:', retryErr);
       }
       // If we get here, something is seriously wrong, but don't break auth
       // Return null and let the app handle it
+      console.warn('⚠️ [AUTH] Returning null profile after all attempts failed');
       return null;
     }
   };
@@ -308,31 +314,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Get initial session
     const initializeAuth = async () => {
+      console.log('🚀 [AUTH] Initializing auth...');
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
 
-        if (!mounted) return;
+        if (!mounted) {
+          console.log('⚪ [AUTH] Component unmounted, skipping init');
+          return;
+        }
 
         if (error) {
-          console.error('Error getting session:', error);
+          console.error('❌ [AUTH] Error getting session:', error);
           setLoading(false);
           clearTimeout(loadingTimeout);
           return;
         }
 
+        console.log('📝 [AUTH] Session obtained:', session ? 'Active session' : 'No session');
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
+          console.log('👤 [AUTH] User found in session:', session.user.email);
           const profile = await fetchProfile(session.user.id);
           if (mounted) {
+            console.log('💾 [AUTH] Setting profile:', profile);
             setProfile(profile);
           }
+        } else {
+          console.log('⚪ [AUTH] No user in session');
         }
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error('❌ [AUTH] Error initializing auth:', error);
       } finally {
         if (mounted) {
+          console.log('✅ [AUTH] Initialization complete, setting loading = false');
           setLoading(false);
           clearTimeout(loadingTimeout);
         }
@@ -344,51 +360,65 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (!mounted) return;
+        if (!mounted) {
+          console.log('⚪ [AUTH] Component unmounted, skipping event:', event);
+          return;
+        }
 
-        console.log('Auth event:', event);
+        console.log('🔔 [AUTH] Auth state change event:', event);
+        console.log('📝 [AUTH] Session data:', session ? `User: ${session.user?.email}` : 'No session');
 
         try {
           // Handle all auth events
           if (event === 'SIGNED_OUT') {
+            console.log('👋 [AUTH] User signed out');
             setSession(null);
             setUser(null);
             setProfile(null);
           } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            console.log(`🔑 [AUTH] ${event}: Processing session`);
             setSession(session);
             setUser(session?.user ?? null);
 
             if (session?.user) {
+              console.log('👤 [AUTH] Fetching profile for:', session.user.email);
               const userProfile = await fetchProfile(session.user.id);
               if (mounted) {
+                console.log('💾 [AUTH] Profile set:', userProfile ? userProfile.user_type : 'null');
                 setProfile(userProfile);
               }
             }
           } else if (event === 'USER_UPDATED') {
+            console.log('🔄 [AUTH] User updated');
             setSession(session);
             setUser(session?.user ?? null);
 
             if (session?.user) {
+              console.log('👤 [AUTH] Fetching updated profile');
               const userProfile = await fetchProfile(session.user.id);
               if (mounted) {
+                console.log('💾 [AUTH] Updated profile set');
                 setProfile(userProfile);
               }
             }
           } else {
             // Handle other events (INITIAL_SESSION, PASSWORD_RECOVERY, etc.)
+            console.log('📋 [AUTH] Other event:', event);
             setSession(session);
             setUser(session?.user ?? null);
 
             // Fetch profile for any session with a user
             if (session?.user) {
+              console.log('👤 [AUTH] Fetching profile for event:', event);
               const userProfile = await fetchProfile(session.user.id);
               if (mounted) {
+                console.log('💾 [AUTH] Profile set for event:', event);
                 setProfile(userProfile);
               }
             }
           }
         } catch (error) {
-          console.error('Error handling auth state change:', error);
+          console.error('❌ [AUTH] Error handling auth state change:', error);
         }
       }
     );
