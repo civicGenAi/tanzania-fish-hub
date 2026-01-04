@@ -17,7 +17,6 @@ const Header: React.FC = () => {
     { href: '/marketplace', label: 'Marketplace' },
     { href: '/about', label: 'About' },
     { href: '/blog', label: 'Blog' },
-    { href: '/contact', label: 'Contact' },
   ];
 
   const handleLogout = async () => {
