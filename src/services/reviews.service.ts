@@ -312,7 +312,7 @@ class ReviewsService {
         .from('reviews')
         .select(`
           *,
-          customer:customer_profiles(id, user_id, full_name),
+          customer:customer_profiles(id, user_id, profiles(full_name)),
           product:products(id, name, images)
         `)
         .eq('seller_id', sellerId)

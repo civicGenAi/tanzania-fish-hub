@@ -31,6 +31,21 @@ const SellerNewProduct: React.FC = () => {
     stock: '',
     unit: 'kg' as ProductUnit,
     min_order_quantity: '1',
+    // Enhanced fields for international market
+    scientific_name: '',
+    product_type: '', // e.g., Whole, Fillet, Steaks
+    source: '', // e.g., Farmed, Wild-caught
+    weight_per_unit: '',
+    size_grade: '', // e.g., Small, Medium, Large
+    harvest_date: '',
+    expiry_date: '',
+    storage_condition: '',
+    processing_status: '',
+    origin_location: '',
+    supplier_name: '',
+    supplier_contact: '',
+    quality_grade: '', // e.g., A, B, C
+    notes: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -162,6 +177,23 @@ const SellerNewProduct: React.FC = () => {
       const slug = formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       const sku = `${slug}-${Date.now()}`.toUpperCase();
 
+      // Prepare metadata with enhanced fields
+      const metadata: Record<string, any> = {};
+      if (formData.scientific_name) metadata.scientific_name = formData.scientific_name;
+      if (formData.product_type) metadata.product_type = formData.product_type;
+      if (formData.source) metadata.source = formData.source;
+      if (formData.weight_per_unit) metadata.weight_per_unit = formData.weight_per_unit;
+      if (formData.size_grade) metadata.size_grade = formData.size_grade;
+      if (formData.harvest_date) metadata.harvest_date = formData.harvest_date;
+      if (formData.expiry_date) metadata.expiry_date = formData.expiry_date;
+      if (formData.storage_condition) metadata.storage_condition = formData.storage_condition;
+      if (formData.processing_status) metadata.processing_status = formData.processing_status;
+      if (formData.origin_location) metadata.origin_location = formData.origin_location;
+      if (formData.supplier_name) metadata.supplier_name = formData.supplier_name;
+      if (formData.supplier_contact) metadata.supplier_contact = formData.supplier_contact;
+      if (formData.quality_grade) metadata.quality_grade = formData.quality_grade;
+      if (formData.notes) metadata.notes = formData.notes;
+
       // Create product
       const product = await productsService.createProduct(sellerId, {
         name: formData.name,
@@ -174,6 +206,7 @@ const SellerNewProduct: React.FC = () => {
         unit: formData.unit,
         min_order_quantity: parseInt(formData.min_order_quantity),
         images: imageUrl ? [imageUrl] : [],
+        metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
       });
 
       toast({
@@ -371,6 +404,207 @@ const SellerNewProduct: React.FC = () => {
                   placeholder="1"
                   min="1"
                   className="h-12"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Product Details (International Market) */}
+          <div className="bg-card border border-border rounded-2xl p-6">
+            <div className="mb-4">
+              <h3 className="font-semibold">Product Details</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Detailed information helps your product reach international markets. The more complete your information, the better!
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Scientific Name</label>
+                <Input
+                  name="scientific_name"
+                  value={formData.scientific_name}
+                  onChange={handleChange}
+                  placeholder="e.g., Oreochromis niloticus"
+                  className="h-12"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Product Type</label>
+                <select
+                  name="product_type"
+                  value={formData.product_type}
+                  onChange={handleChange}
+                  className="w-full h-12 px-4 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Select type</option>
+                  <option value="Whole">Whole</option>
+                  <option value="Fillet">Fillet</option>
+                  <option value="Steaks">Steaks</option>
+                  <option value="Portions">Portions</option>
+                  <option value="Gutted">Gutted and Cleaned</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Source</label>
+                <select
+                  name="source"
+                  value={formData.source}
+                  onChange={handleChange}
+                  className="w-full h-12 px-4 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Select source</option>
+                  <option value="Farmed">Farmed</option>
+                  <option value="Wild-caught">Wild-caught</option>
+                  <option value="Aquaculture">Aquaculture</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Size Grade</label>
+                <select
+                  name="size_grade"
+                  value={formData.size_grade}
+                  onChange={handleChange}
+                  className="w-full h-12 px-4 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Select grade</option>
+                  <option value="Small">Small</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Large">Large</option>
+                  <option value="Extra Large">Extra Large</option>
+                  <option value="Jumbo">Jumbo</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Weight per Unit (kg)</label>
+                <Input
+                  type="number"
+                  name="weight_per_unit"
+                  value={formData.weight_per_unit}
+                  onChange={handleChange}
+                  placeholder="e.g., 1.2"
+                  step="0.1"
+                  min="0"
+                  className="h-12"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Quality Grade</label>
+                <select
+                  name="quality_grade"
+                  value={formData.quality_grade}
+                  onChange={handleChange}
+                  className="w-full h-12 px-4 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Select grade</option>
+                  <option value="A">Grade A (Premium)</option>
+                  <option value="B">Grade B (Standard)</option>
+                  <option value="C">Grade C (Economy)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Harvest & Storage */}
+          <div className="bg-card border border-border rounded-2xl p-6">
+            <h3 className="font-semibold mb-4">Harvest & Storage Information</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Harvest Date</label>
+                <Input
+                  type="date"
+                  name="harvest_date"
+                  value={formData.harvest_date}
+                  onChange={handleChange}
+                  className="h-12"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Expiry / Best Before Date</label>
+                <Input
+                  type="date"
+                  name="expiry_date"
+                  value={formData.expiry_date}
+                  onChange={handleChange}
+                  className="h-12"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Storage Condition</label>
+                <Input
+                  name="storage_condition"
+                  value={formData.storage_condition}
+                  onChange={handleChange}
+                  placeholder="e.g., Kept on ice (0–4°C)"
+                  className="h-12"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Processing Status</label>
+                <Input
+                  name="processing_status"
+                  value={formData.processing_status}
+                  onChange={handleChange}
+                  placeholder="e.g., Fresh, gutted and cleaned"
+                  className="h-12"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Supplier Information */}
+          <div className="bg-card border border-border rounded-2xl p-6">
+            <h3 className="font-semibold mb-4">Supplier & Origin</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Origin Location</label>
+                <Input
+                  name="origin_location"
+                  value={formData.origin_location}
+                  onChange={handleChange}
+                  placeholder="e.g., Mwanza, Lake Victoria"
+                  className="h-12"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Supplier Name</label>
+                <Input
+                  name="supplier_name"
+                  value={formData.supplier_name}
+                  onChange={handleChange}
+                  placeholder="e.g., LakeFresh Fish Farm"
+                  className="h-12"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-2">Supplier Contact</label>
+                <Input
+                  name="supplier_contact"
+                  value={formData.supplier_contact}
+                  onChange={handleChange}
+                  placeholder="e.g., +255 XXX XXX XXX"
+                  className="h-12"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-2">Additional Notes</label>
+                <textarea
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleChange}
+                  rows={3}
+                  placeholder="e.g., No preservatives used, certified organic, etc."
+                  className="w-full px-4 py-2.5 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                 />
               </div>
             </div>

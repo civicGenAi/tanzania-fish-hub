@@ -308,7 +308,7 @@ class AnalyticsService {
             customer_id,
             created_at,
             status,
-            customer:profiles!orders_customer_id_fkey(id, full_name)
+            customer:customer_profiles(id, profiles(full_name))
           )
         `)
         .eq('seller_id', sellerId);
@@ -326,7 +326,7 @@ class AnalyticsService {
       items?.forEach((item: any) => {
         if (item.order?.status === 'delivered') {
           const customerId = item.order.customer_id;
-          const customerName = item.order.customer?.full_name || 'Unknown';
+          const customerName = item.order.customer?.profiles?.full_name || 'Unknown';
 
           if (!customerMap.has(customerId)) {
             customerMap.set(customerId, {

@@ -356,11 +356,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         } catch (error) {
           console.error('Error handling auth state change:', error);
-        } finally {
-          // Always set loading to false after handling auth events
-          if (mounted) {
-            setLoading(false);
-          }
         }
       }
     );
