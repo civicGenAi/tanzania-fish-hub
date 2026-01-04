@@ -2,8 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Star, MapPin, Plus, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn, formatPrice } from '@/lib/utils';
 import { toast } from 'sonner';
+import { Product } from '@/types/product.types';
 
 interface FishCardProps {
   fish: Product;
@@ -88,13 +89,13 @@ const FishCard: React.FC<FishCardProps> = ({ fish, variant = 'default' }) => {
 
               {/* Add to Cart */}
               <Button
-                variant={isInCart(fish.id) ? "fresh" : "ocean"}
+                variant={isInCart ? "fresh" : "ocean"}
                 size="icon"
                 className="h-10 w-10 rounded-full shadow-lg"
                 onClick={handleAddToCart}
                 disabled={fish.status !== 'active' || fish.stock === 0}
               >
-                {isInCart(fish.id) ? (
+                {isInCart ? (
                   <Check className="h-4 w-4" />
                 ) : (
                   <Plus className="h-4 w-4" />

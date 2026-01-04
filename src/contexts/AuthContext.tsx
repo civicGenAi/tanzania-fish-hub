@@ -263,21 +263,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Initialize auth state
   useEffect(() => {
     let mounted = true;
+    let loadingTimeout: NodeJS.Timeout;
+
+    // Safety timeout - ensure loading never stays true forever (5 seconds max)
+    loadingTimeout = setTimeout(() => {
+      if (mounted) {
+        console.warn('Auth loading timeout - forcing loading to false');
+        setLoading(false);
+      }
+    }, 5000);
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
 
-      setSession(session);
-      setUser(session?.user ?? null);
+        if (!mounted) return;
 
-      if (session?.user) {
-        fetchProfile(session.user.id).then((profile) => {
-          if (mounted) setProfile(profile);
-        });
+        if (error) {
+          console.error('Error getting session:', error);
+          setLoading(false);
+          clearTimeout(loadingTimeout);
+          return;
+        }
+
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          const profile = await fetchProfile(session.user.id);
+          if (mounted) {
+            setProfile(profile);
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+          clearTimeout(loadingTimeout);
+        }
       }
-      setLoading(false);
-    });
+    };
+
+    initializeAuth();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -286,41 +315,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         console.log('Auth event:', event);
 
-        // Handle all auth events to ensure loading is always set to false
-        if (event === 'SIGNED_OUT') {
-          setSession(null);
-          setUser(null);
-          setProfile(null);
-          setLoading(false);
-        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          setSession(session);
-          setUser(session?.user ?? null);
+        try {
+          // Handle all auth events
+          if (event === 'SIGNED_OUT') {
+            setSession(null);
+            setUser(null);
+            setProfile(null);
+          } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            setSession(session);
+            setUser(session?.user ?? null);
 
-          if (session?.user) {
-            const userProfile = await fetchProfile(session.user.id);
-            if (mounted) {
-              setProfile(userProfile);
+            if (session?.user) {
+              const userProfile = await fetchProfile(session.user.id);
+              if (mounted) {
+                setProfile(userProfile);
+              }
             }
-          }
-          setLoading(false);
-        } else {
-          // Handle other events (INITIAL_SESSION, USER_UPDATED, etc.)
-          setSession(session);
-          setUser(session?.user ?? null);
+          } else if (event === 'USER_UPDATED') {
+            setSession(session);
+            setUser(session?.user ?? null);
 
-          if (session?.user && !profile) {
-            const userProfile = await fetchProfile(session.user.id);
-            if (mounted) {
-              setProfile(userProfile);
+            if (session?.user) {
+              const userProfile = await fetchProfile(session.user.id);
+              if (mounted) {
+                setProfile(userProfile);
+              }
             }
+          } else {
+            // Handle other events (INITIAL_SESSION, PASSWORD_RECOVERY, etc.)
+            setSession(session);
+            setUser(session?.user ?? null);
           }
-          setLoading(false);
+        } catch (error) {
+          console.error('Error handling auth state change:', error);
+        } finally {
+          // Always set loading to false after handling auth events
+          if (mounted) {
+            setLoading(false);
+          }
         }
       }
     );
 
     return () => {
       mounted = false;
+      clearTimeout(loadingTimeout);
       subscription.unsubscribe();
     };
   }, []);
