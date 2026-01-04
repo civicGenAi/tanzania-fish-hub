@@ -364,4 +364,239 @@ class AdminService {
   }
 }
 
+  // ==================== USER MANAGEMENT ====================
+
+  // Get all users (customers, sellers, distributors)
+  async getAllUsers(filters?: {
+    user_type?: string;
+    status?: string;
+    search?: string;
+  }): Promise<any[]> {
+    try {
+      let query = supabase
+        .from('profiles')
+        .select(`
+          id,
+          email,
+          full_name,
+          phone,
+          avatar_url,
+          user_type,
+          status,
+          created_at,
+          updated_at
+        `)
+        .order('created_at', { ascending: false });
+
+      if (filters?.user_type && filters.user_type !== 'all') {
+        query = query.eq('user_type', filters.user_type);
+      }
+
+      if (filters?.status && filters.status !== 'all') {
+        query = query.eq('status', filters.status);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      // Filter by search term
+      let filteredData = data || [];
+      if (filters?.search) {
+        const searchLower = filters.search.toLowerCase();
+        filteredData = filteredData.filter(
+          (user: any) =>
+            user.full_name?.toLowerCase().includes(searchLower) ||
+            user.email?.toLowerCase().includes(searchLower) ||
+            user.phone?.includes(searchLower)
+        );
+      }
+
+      return filteredData;
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      throw error;
+    }
+  }
+
+  // Get user statistics
+  async getUserStats(): Promise<{
+    total_users: number;
+    active_users: number;
+    suspended_users: number;
+    customers: number;
+    sellers: number;
+    distributors: number;
+    admins: number;
+  }> {
+    try {
+      const { data: users, error } = await supabase
+        .from('profiles')
+        .select('user_type, status');
+
+      if (error) throw error;
+
+      return {
+        total_users: users?.length || 0,
+        active_users: users?.filter((u) => u.status === 'active').length || 0,
+        suspended_users: users?.filter((u) => u.status === 'suspended').length || 0,
+        customers: users?.filter((u) => u.user_type === 'customer').length || 0,
+        sellers: users?.filter((u) => u.user_type === 'seller').length || 0,
+        distributors: users?.filter((u) => u.user_type === 'distributor').length || 0,
+        admins: users?.filter((u) => u.user_type === 'admin').length || 0,
+      };
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+      throw error;
+    }
+  }
+
+  // Update user status (activate/suspend)
+  async updateUserStatus(
+    userId: string,
+    status: 'active' | 'inactive' | 'suspended'
+  ): Promise<any> {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', userId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return data;
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      throw error;
+    }
+  }
+
+  // Update user role/type
+  async updateUserType(
+    userId: string,
+    userType: 'customer' | 'seller' | 'distributor' | 'admin'
+  ): Promise<any> {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ user_type: userType, updated_at: new Date().toISOString() })
+        .eq('id', userId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return data;
+    } catch (error) {
+      console.error('Error updating user type:', error);
+      throw error;
+    }
+  }
+
+  // Get user details with role-specific info
+  async getUserDetails(userId: string): Promise<any> {
+    try {
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (profileError) throw profileError;
+
+      let roleProfile = null;
+
+      // Fetch role-specific profile
+      switch (profile.user_type) {
+        case 'customer':
+          const { data: customerProfile } = await supabase
+            .from('customer_profiles')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
+          roleProfile = customerProfile;
+          break;
+
+        case 'seller':
+          const { data: sellerProfile } = await supabase
+            .from('seller_profiles')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
+          roleProfile = sellerProfile;
+          break;
+
+        case 'distributor':
+          const { data: distributorProfile } = await supabase
+            .from('distributor_profiles')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
+          roleProfile = distributorProfile;
+          break;
+      }
+
+      return {
+        ...profile,
+        role_profile: roleProfile,
+      };
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      throw error;
+    }
+  }
+
+  // Delete user (admin only)
+  async deleteUser(userId: string): Promise<void> {
+    try {
+      // Note: This should cascade delete role-specific profiles
+      const { error } = await supabase.from('profiles').delete().eq('id', userId);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw error;
+    }
+  }
+
+  // Export users to CSV
+  async exportUsers(filters?: {
+    user_type?: string;
+    status?: string;
+  }): Promise<string> {
+    try {
+      const users = await this.getAllUsers(filters);
+
+      const csvHeaders = [
+        'ID',
+        'Name',
+        'Email',
+        'Phone',
+        'User Type',
+        'Status',
+        'Created At',
+      ].join(',');
+
+      const csvRows = users.map((user) => {
+        return [
+          user.id,
+          user.full_name || '',
+          user.email,
+          user.phone || '',
+          user.user_type,
+          user.status,
+          new Date(user.created_at).toLocaleDateString(),
+        ].join(',');
+      });
+
+      return [csvHeaders, ...csvRows].join('\n');
+    } catch (error) {
+      console.error('Error exporting users:', error);
+      throw error;
+    }
+  }
+}
+
 export const adminService = new AdminService();
