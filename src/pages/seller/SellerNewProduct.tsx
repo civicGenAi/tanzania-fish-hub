@@ -182,9 +182,11 @@ const SellerNewProduct: React.FC = () => {
         console.log('⚪ [PRODUCT FORM] No image to upload');
       }
 
-      // Generate slug and SKU
-      const slug = formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-      const sku = `${slug}-${Date.now()}`.toUpperCase();
+      // Generate unique slug and SKU with timestamp to prevent duplicates
+      const baseSlug = formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const timestamp = Date.now();
+      const slug = `${baseSlug}-${timestamp}`;
+      const sku = `${baseSlug}-${timestamp}`.toUpperCase();
       console.log('🏷️ [PRODUCT FORM] Generated slug:', slug, 'SKU:', sku);
 
       // Convert empty date strings to null
