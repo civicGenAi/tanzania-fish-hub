@@ -370,7 +370,13 @@ const SellerSettings: React.FC = () => {
 
     try {
       // Set certifications to pending approval if they were just checked
-      const updates = { ...certificationData };
+      const updates: any = { ...certificationData };
+
+      // Convert empty date strings to null
+      if (updates.haccp_expiry_date === '') updates.haccp_expiry_date = null;
+      if (updates.gap_expiry_date === '') updates.gap_expiry_date = null;
+      if (updates.gmp_expiry_date === '') updates.gmp_expiry_date = null;
+      if (updates.sanitary_cert_expiry === '') updates.sanitary_cert_expiry = null;
 
       // HACCP
       if (certificationData.haccp_certified && !certificationData.haccp_approved) {
