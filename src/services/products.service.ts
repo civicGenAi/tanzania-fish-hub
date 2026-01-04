@@ -63,7 +63,7 @@ class ProductsService {
         .from('products')
         .select(`
           *,
-          category:product_categories(id, name, slug),
+          category:categories(id, name, slug),
           seller:seller_profiles(id, business_name, user_id),
           images:product_images(id, image_url, display_order),
           variants:product_variants(id, name, price, stock_quantity, sku)
