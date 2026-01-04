@@ -362,7 +362,6 @@ class AdminService {
       throw error;
     }
   }
-}
 
   // ==================== USER MANAGEMENT ====================
 
