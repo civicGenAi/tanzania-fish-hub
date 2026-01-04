@@ -76,9 +76,6 @@ import Regions from "./pages/admin/Regions";
 import Reviews from "./pages/admin/Reviews";
 import Reports from "./pages/admin/Reports";
 import Messages from "./pages/admin/Messages";
-import Contact from "./pages/Contact";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
 
 const queryClient = new QueryClient();
 
@@ -101,9 +98,6 @@ const App = () => (
               <Route path="/about" element={<About />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:id" element={<BlogPost />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
 
               {/* Auth Routes - Redirect to dashboard if already logged in */}
               <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />

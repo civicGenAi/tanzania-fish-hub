@@ -151,7 +151,7 @@ const Footer: React.FC = () => {
       {/* Bottom Bar */}
       <div className="border-t border-background/10">
         <div className="container py-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-background/50">
-          <p>© 2026 FishHappy Tanzania. All rights reserved.</p>
+          <p>© 2024 FishHappy Tanzania. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <Link to="/privacy" className="hover:text-primary transition-colors">
               Privacy Policy
