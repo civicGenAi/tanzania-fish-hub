@@ -52,14 +52,16 @@ const SellerSidebar: React.FC = () => {
           const products = await productsService.getSellerProducts(sellerProfile.id);
           setProductCount(products.length);
 
-          // Get order count (pending orders)
-          const { count } = await supabase
-            .from('orders')
-            .select('*', { count: 'exact', head: true })
+          // Get order count (pending orders) from order_items
+          const { data: orderItems } = await supabase
+            .from('order_items')
+            .select('order_id, order:orders!inner(status)')
             .eq('seller_id', sellerProfile.id)
-            .in('status', ['pending', 'processing', 'confirmed']);
+            .in('order.status', ['pending', 'processing', 'confirmed']);
 
-          setOrderCount(count || 0);
+          // Count unique orders
+          const uniqueOrders = new Set(orderItems?.map(item => (item as any).order_id));
+          setOrderCount(uniqueOrders.size);
         }
       } catch (error) {
         console.error('Error fetching counts:', error);
