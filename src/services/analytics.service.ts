@@ -303,7 +303,13 @@ class AnalyticsService {
         .from('order_items')
         .select(`
           total_price,
-          order:orders(id, customer_id, created_at, status, customer:customer_profiles(id, full_name))
+          order:orders(
+            id,
+            customer_id,
+            created_at,
+            status,
+            customer:profiles!orders_customer_id_fkey(id, full_name)
+          )
         `)
         .eq('seller_id', sellerId);
 
