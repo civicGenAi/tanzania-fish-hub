@@ -296,7 +296,7 @@ const Orders = () => {
               ) : (
                 orders.map((order) => {
                   const orderDate = new Date(order.created_at);
-                  const customerInitials = order.customer?.full_name
+                  const customerInitials = order.customer?.profiles?.full_name
                     ?.split(' ')
                     .map((n) => n[0])
                     .join('') || '?';
@@ -325,8 +325,8 @@ const Orders = () => {
                               {customerInitials}
                             </div>
                             <div>
-                              <p className="font-medium text-gray-900">{order.customer?.full_name || 'Unknown'}</p>
-                              <p className="text-sm text-gray-500">{order.customer?.email || 'N/A'}</p>
+                              <p className="font-medium text-gray-900">{order.customer?.profiles?.full_name || 'Unknown'}</p>
+                              <p className="text-sm text-gray-500">{order.customer?.profiles?.email || 'N/A'}</p>
                             </div>
                           </div>
                         </td>

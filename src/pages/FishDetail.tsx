@@ -404,12 +404,12 @@ const FishDetailPage: React.FC = () => {
                     <div key={review.id} className="border-b border-border last:border-0 pb-6 last:pb-0">
                       <div className="flex items-start gap-4">
                         <div className="w-10 h-10 rounded-full bg-ocean-light flex items-center justify-center font-bold text-primary">
-                          {review.customer?.full_name?.[0] || 'U'}
+                          {review.customer?.profiles?.full_name?.[0] || 'U'}
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-2">
                             <div>
-                              <p className="font-semibold">{review.customer?.full_name || 'Anonymous'}</p>
+                              <p className="font-semibold">{review.customer?.profiles?.full_name || 'Anonymous'}</p>
                               <div className="flex gap-1 my-1">
                                 {[1, 2, 3, 4, 5].map((star) => (
                                   <Star

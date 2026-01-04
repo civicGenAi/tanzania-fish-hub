@@ -45,7 +45,7 @@ class ReviewsService {
         .from('reviews')
         .select(`
           *,
-          customer:customer_profiles(id, user_id, full_name),
+          customer:customer_profiles(id, user_id, profiles(full_name)),
           product:products(id, name, images)
         `)
         .eq('id', reviewId)
@@ -66,7 +66,7 @@ class ReviewsService {
         .from('reviews')
         .select(`
           *,
-          customer:customer_profiles(id, user_id, full_name)
+          customer:customer_profiles(id, user_id, profiles(full_name))
         `)
         .order('created_at', { ascending: false });
 
@@ -111,7 +111,7 @@ class ReviewsService {
         .from('reviews')
         .select(`
           *,
-          customer:customer_profiles(id, user_id, full_name)
+          customer:customer_profiles(id, user_id, profiles(full_name))
         `)
         .eq('product_id', productId)
         .eq('status', 'published')

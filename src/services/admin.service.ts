@@ -55,9 +55,7 @@ class AdminService {
           ),
           customer:customer_profiles(
             id,
-            full_name,
-            email,
-            phone
+            profiles(full_name, email, phone)
           ),
           shipping_address:shipping_addresses(
             id,
@@ -104,8 +102,8 @@ class AdminService {
         filteredData = filteredData.filter(
           (order: any) =>
             order.order_number.toLowerCase().includes(searchLower) ||
-            order.customer?.full_name?.toLowerCase().includes(searchLower) ||
-            order.customer?.email?.toLowerCase().includes(searchLower)
+            order.customer?.profiles?.full_name?.toLowerCase().includes(searchLower) ||
+            order.customer?.profiles?.email?.toLowerCase().includes(searchLower)
         );
       }
 
@@ -322,8 +320,8 @@ class AdminService {
       const csvRows = orders.map((order) => {
         return [
           order.order_number,
-          order.customer?.full_name || '',
-          order.customer?.email || '',
+          order.customer?.profiles?.full_name || '',
+          order.customer?.profiles?.email || '',
           new Date(order.created_at).toLocaleDateString(),
           order.status,
           order.payment_status,
