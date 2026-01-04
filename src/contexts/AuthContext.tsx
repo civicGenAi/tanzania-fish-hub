@@ -345,6 +345,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // Handle other events (INITIAL_SESSION, PASSWORD_RECOVERY, etc.)
             setSession(session);
             setUser(session?.user ?? null);
+
+            // Fetch profile for any session with a user
+            if (session?.user) {
+              const userProfile = await fetchProfile(session.user.id);
+              if (mounted) {
+                setProfile(userProfile);
+              }
+            }
           }
         } catch (error) {
           console.error('Error handling auth state change:', error);
