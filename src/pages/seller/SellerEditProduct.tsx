@@ -34,6 +34,21 @@ const SellerEditProduct: React.FC = () => {
     unit: 'kg' as ProductUnit,
     min_order_quantity: '1',
     status: 'active' as 'active' | 'inactive' | 'out_of_stock' | 'discontinued',
+    // Enhanced fields for international market
+    scientific_name: '',
+    product_type: '',
+    source: '',
+    weight_per_unit: '',
+    size_grade: '',
+    harvest_date: '',
+    expiry_date: '',
+    storage_condition: '',
+    processing_status: '',
+    origin_location: '',
+    supplier_name: '',
+    supplier_contact: '',
+    quality_grade: '',
+    notes: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -85,6 +100,21 @@ const SellerEditProduct: React.FC = () => {
           unit: productData.unit,
           min_order_quantity: productData.min_order_quantity.toString(),
           status: productData.status,
+          // Populate enhanced fields
+          scientific_name: (productData as any).scientific_name || '',
+          product_type: (productData as any).product_type || '',
+          source: (productData as any).source || '',
+          weight_per_unit: (productData as any).weight_per_unit?.toString() || '',
+          size_grade: (productData as any).size_grade || '',
+          harvest_date: (productData as any).harvest_date || '',
+          expiry_date: (productData as any).expiry_date || '',
+          storage_condition: (productData as any).storage_condition || '',
+          processing_status: (productData as any).processing_status || '',
+          origin_location: (productData as any).origin_location || '',
+          supplier_name: (productData as any).supplier_name || '',
+          supplier_contact: (productData as any).supplier_contact || '',
+          quality_grade: (productData as any).quality_grade || '',
+          notes: (productData as any).product_notes || '',
         });
 
         if (productData.images && productData.images.length > 0) {
@@ -202,7 +232,12 @@ const SellerEditProduct: React.FC = () => {
         slug = formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       }
 
-      // Update product
+      // Convert empty date strings to null
+      const harvestDate = formData.harvest_date || null;
+      const expiryDate = formData.expiry_date || null;
+      const weightPerUnit = formData.weight_per_unit ? parseFloat(formData.weight_per_unit) : null;
+
+      // Update product with all enhanced fields
       await productsService.updateProduct(id, {
         name: formData.name,
         slug,
@@ -214,6 +249,21 @@ const SellerEditProduct: React.FC = () => {
         min_order_quantity: parseInt(formData.min_order_quantity),
         status: formData.status,
         images: imageFile ? images : undefined,
+        // Enhanced fields as actual database columns
+        scientific_name: formData.scientific_name || undefined,
+        product_type: formData.product_type || undefined,
+        source: formData.source || undefined,
+        weight_per_unit: weightPerUnit,
+        size_grade: formData.size_grade || undefined,
+        harvest_date: harvestDate,
+        expiry_date: expiryDate,
+        storage_condition: formData.storage_condition || undefined,
+        processing_status: formData.processing_status || undefined,
+        origin_location: formData.origin_location || undefined,
+        supplier_name: formData.supplier_name || undefined,
+        supplier_contact: formData.supplier_contact || undefined,
+        quality_grade: formData.quality_grade || undefined,
+        product_notes: formData.notes || undefined,
       });
 
       toast({

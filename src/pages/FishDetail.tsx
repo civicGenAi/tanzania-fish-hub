@@ -253,6 +253,146 @@ const FishDetailPage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Export & Quality Information */}
+              {(product.scientific_name || product.product_type || product.source || product.weight_per_unit ||
+                product.size_grade || product.quality_grade || product.harvest_date || product.expiry_date ||
+                product.storage_condition || product.processing_status || product.origin_location ||
+                product.supplier_name) && (
+                <div className="border-t border-border pt-6">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-primary" />
+                    Export & Quality Information
+                  </h3>
+
+                  <div className="space-y-6">
+                    {/* Product Specifications */}
+                    {(product.scientific_name || product.product_type || product.source) && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-muted-foreground mb-3">Product Specifications</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {product.scientific_name && (
+                            <div className="bg-ocean-light/30 rounded-xl p-3">
+                              <p className="text-xs text-muted-foreground">Scientific Name</p>
+                              <p className="font-medium italic">{product.scientific_name}</p>
+                            </div>
+                          )}
+                          {product.product_type && (
+                            <div className="bg-ocean-light/30 rounded-xl p-3">
+                              <p className="text-xs text-muted-foreground">Product Type</p>
+                              <p className="font-medium">{product.product_type}</p>
+                            </div>
+                          )}
+                          {product.source && (
+                            <div className="bg-ocean-light/30 rounded-xl p-3">
+                              <p className="text-xs text-muted-foreground">Source</p>
+                              <p className="font-medium">{product.source}</p>
+                            </div>
+                          )}
+                          {product.weight_per_unit && (
+                            <div className="bg-ocean-light/30 rounded-xl p-3">
+                              <p className="text-xs text-muted-foreground">Weight per Unit</p>
+                              <p className="font-medium">{product.weight_per_unit} kg</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Quality & Grading */}
+                    {(product.size_grade || product.quality_grade || product.processing_status) && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-muted-foreground mb-3">Quality & Grading</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          {product.size_grade && (
+                            <div className="bg-secondary/20 rounded-xl p-3">
+                              <p className="text-xs text-muted-foreground">Size Grade</p>
+                              <p className="font-medium">{product.size_grade}</p>
+                            </div>
+                          )}
+                          {product.quality_grade && (
+                            <div className="bg-secondary/20 rounded-xl p-3">
+                              <p className="text-xs text-muted-foreground">Quality Grade</p>
+                              <p className="font-medium text-secondary">Grade {product.quality_grade}</p>
+                            </div>
+                          )}
+                          {product.processing_status && (
+                            <div className="bg-secondary/20 rounded-xl p-3">
+                              <p className="text-xs text-muted-foreground">Processing Status</p>
+                              <p className="font-medium">{product.processing_status}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Dates & Storage */}
+                    {(product.harvest_date || product.expiry_date || product.storage_condition) && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-muted-foreground mb-3">Dates & Storage</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          {product.harvest_date && (
+                            <div className="bg-muted rounded-xl p-3">
+                              <p className="text-xs text-muted-foreground">Harvest Date</p>
+                              <p className="font-medium">{new Date(product.harvest_date).toLocaleDateString()}</p>
+                            </div>
+                          )}
+                          {product.expiry_date && (
+                            <div className="bg-muted rounded-xl p-3">
+                              <p className="text-xs text-muted-foreground">Expiry Date</p>
+                              <p className="font-medium">{new Date(product.expiry_date).toLocaleDateString()}</p>
+                            </div>
+                          )}
+                          {product.storage_condition && (
+                            <div className="bg-muted rounded-xl p-3">
+                              <p className="text-xs text-muted-foreground">Storage Condition</p>
+                              <p className="font-medium">{product.storage_condition}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Origin & Supplier */}
+                    {(product.origin_location || product.supplier_name || product.supplier_contact) && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-muted-foreground mb-3">Origin & Supplier</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {product.origin_location && (
+                            <div className="bg-muted rounded-xl p-3">
+                              <p className="text-xs text-muted-foreground">Origin Location</p>
+                              <p className="font-medium flex items-center gap-1">
+                                <MapPin className="h-3 w-3" />
+                                {product.origin_location}
+                              </p>
+                            </div>
+                          )}
+                          {product.supplier_name && (
+                            <div className="bg-muted rounded-xl p-3">
+                              <p className="text-xs text-muted-foreground">Supplier Name</p>
+                              <p className="font-medium">{product.supplier_name}</p>
+                            </div>
+                          )}
+                          {product.supplier_contact && (
+                            <div className="bg-muted rounded-xl p-3 md:col-span-2">
+                              <p className="text-xs text-muted-foreground">Supplier Contact</p>
+                              <p className="font-medium">{product.supplier_contact}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Additional Notes */}
+                    {product.product_notes && (
+                      <div className="bg-ocean-light/20 rounded-xl p-4 border border-primary/20">
+                        <h4 className="text-sm font-semibold text-muted-foreground mb-2">Additional Information</h4>
+                        <p className="text-sm leading-relaxed">{product.product_notes}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Quantity & Add to Cart */}
               <div className="space-y-4 pt-4 border-t border-border">
                 <div className="flex items-center gap-4">
