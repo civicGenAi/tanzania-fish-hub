@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Package, DollarSign, Star, TrendingUp, Plus, Edit, Trash2,
   Eye, EyeOff, BarChart3, Users, ArrowUpRight, ArrowDownRight, Loader2, ShoppingCart
@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 
 const SellerDashboard: React.FC = () => {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('products');
   const [loading, setLoading] = useState(true);
   const [myProducts, setMyProducts] = useState<Product[]>([]);
@@ -52,14 +53,16 @@ const SellerDashboard: React.FC = () => {
           setMyProducts(products.slice(0, 4));
           setProductCount(products.length);
 
-          // Get order count
-          const { count } = await supabase
-            .from('orders')
-            .select('*', { count: 'exact', head: true })
+          // Get order count from order_items
+          const { data: orderItems } = await supabase
+            .from('order_items')
+            .select('order_id, order:orders!inner(status)')
             .eq('seller_id', sellerProfile.id)
-            .in('status', ['pending', 'processing', 'confirmed']);
+            .in('order.status', ['pending', 'processing', 'confirmed']);
 
-          setOrderCount(count || 0);
+          // Count unique orders
+          const uniqueOrders = new Set(orderItems?.map(item => (item as any).order_id));
+          setOrderCount(uniqueOrders.size);
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
