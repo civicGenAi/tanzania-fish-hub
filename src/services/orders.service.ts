@@ -122,20 +122,14 @@ class OrdersService {
   // Get seller orders (orders containing seller's products)
   async getSellerOrders(sellerId: string, filters?: OrderFilters): Promise<OrderWithDetails[]> {
     try {
-      let query = supabase
+      // Query order_items for this seller with joined order data
+      const { data, error } = await supabase
         .from('order_items')
         .select(`
           *,
           order:orders(*)
         `)
-        .eq('seller_id', sellerId)
-        .order('created_at', { ascending: false });
-
-      if (filters?.status) {
-        query = query.eq('order.status', filters.status);
-      }
-
-      const { data, error } = await query;
+        .eq('seller_id', sellerId);
 
       if (error) throw error;
 
@@ -143,13 +137,20 @@ class OrdersService {
       const ordersMap = new Map<string, OrderWithDetails>();
       data?.forEach((item: any) => {
         const order = item.order;
+        // Apply status filter if provided
+        if (filters?.status && order.status !== filters.status) {
+          return;
+        }
+
         if (!ordersMap.has(order.id)) {
           ordersMap.set(order.id, { ...order, items: [] });
         }
         ordersMap.get(order.id)!.items!.push(item);
       });
 
-      return Array.from(ordersMap.values());
+      // Convert to array and sort by order created_at (descending)
+      return Array.from(ordersMap.values())
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     } catch (error) {
       console.error('Error fetching seller orders:', error);
       throw error;
