@@ -177,24 +177,12 @@ const SellerNewProduct: React.FC = () => {
       const slug = formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       const sku = `${slug}-${Date.now()}`.toUpperCase();
 
-      // Prepare metadata with enhanced fields
-      const metadata: Record<string, any> = {};
-      if (formData.scientific_name) metadata.scientific_name = formData.scientific_name;
-      if (formData.product_type) metadata.product_type = formData.product_type;
-      if (formData.source) metadata.source = formData.source;
-      if (formData.weight_per_unit) metadata.weight_per_unit = formData.weight_per_unit;
-      if (formData.size_grade) metadata.size_grade = formData.size_grade;
-      if (formData.harvest_date) metadata.harvest_date = formData.harvest_date;
-      if (formData.expiry_date) metadata.expiry_date = formData.expiry_date;
-      if (formData.storage_condition) metadata.storage_condition = formData.storage_condition;
-      if (formData.processing_status) metadata.processing_status = formData.processing_status;
-      if (formData.origin_location) metadata.origin_location = formData.origin_location;
-      if (formData.supplier_name) metadata.supplier_name = formData.supplier_name;
-      if (formData.supplier_contact) metadata.supplier_contact = formData.supplier_contact;
-      if (formData.quality_grade) metadata.quality_grade = formData.quality_grade;
-      if (formData.notes) metadata.notes = formData.notes;
+      // Convert empty date strings to null
+      const harvestDate = formData.harvest_date || null;
+      const expiryDate = formData.expiry_date || null;
+      const weightPerUnit = formData.weight_per_unit ? parseFloat(formData.weight_per_unit) : null;
 
-      // Create product
+      // Create product with enhanced fields as actual columns
       const product = await productsService.createProduct(sellerId, {
         name: formData.name,
         slug,
@@ -206,7 +194,21 @@ const SellerNewProduct: React.FC = () => {
         unit: formData.unit,
         min_order_quantity: parseInt(formData.min_order_quantity),
         images: imageUrl ? [imageUrl] : [],
-        metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
+        // Enhanced fields as actual database columns
+        scientific_name: formData.scientific_name || undefined,
+        product_type: formData.product_type || undefined,
+        source: formData.source || undefined,
+        weight_per_unit: weightPerUnit,
+        size_grade: formData.size_grade || undefined,
+        harvest_date: harvestDate,
+        expiry_date: expiryDate,
+        storage_condition: formData.storage_condition || undefined,
+        processing_status: formData.processing_status || undefined,
+        origin_location: formData.origin_location || undefined,
+        supplier_name: formData.supplier_name || undefined,
+        supplier_contact: formData.supplier_contact || undefined,
+        quality_grade: formData.quality_grade || undefined,
+        product_notes: formData.notes || undefined,
       });
 
       toast({
