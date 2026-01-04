@@ -51,22 +51,32 @@ const CustomerOrders: React.FC = () => {
 
   useEffect(() => {
     const fetchCustomerIdAndOrders = async () => {
-      if (!profile) return;
+      if (!profile) {
+        console.log('⚪ [CUSTOMER ORDERS] No profile, skipping fetch');
+        return;
+      }
 
       try {
+        console.log('🔵 [CUSTOMER ORDERS] Starting orders fetch for profile:', profile.email);
         setLoading(true);
 
         // Get customer ID
+        console.log('🔍 [CUSTOMER ORDERS] Fetching customer profile...');
         const { data: customerProfile, error: customerError } = await supabase
           .from('customer_profiles')
           .select('id')
           .eq('user_id', profile.id)
           .single();
 
-        if (customerError) throw customerError;
+        if (customerError) {
+          console.error('❌ [CUSTOMER ORDERS] Error fetching customer profile:', customerError);
+          throw customerError;
+        }
+        console.log('✅ [CUSTOMER ORDERS] Customer ID:', customerProfile.id);
         setCustomerId(customerProfile.id);
 
         // Get orders with items
+        console.log('🔍 [CUSTOMER ORDERS] Fetching orders...');
         const { data: customerOrders, error: ordersError } = await supabase
           .from('orders')
           .select(`
@@ -76,17 +86,23 @@ const CustomerOrders: React.FC = () => {
           .eq('customer_id', customerProfile.id)
           .order('created_at', { ascending: false });
 
-        if (ordersError) throw ordersError;
+        if (ordersError) {
+          console.error('❌ [CUSTOMER ORDERS] Error fetching orders:', ordersError);
+          console.error('❌ [CUSTOMER ORDERS] This might be due to RLS policy recursion. Make sure migration 015 is applied!');
+          throw ordersError;
+        }
+        console.log('✅ [CUSTOMER ORDERS] Orders fetched:', customerOrders?.length || 0, 'orders');
         setOrders(customerOrders as OrderWithDetails[] || []);
       } catch (error) {
-        console.error('Error fetching orders:', error);
+        console.error('❌ [CUSTOMER ORDERS] Error fetching orders:', error);
         toast({
           title: 'Error',
-          description: 'Failed to load orders',
+          description: 'Failed to load orders. If you see "infinite recursion" error, please apply migration 015.',
           variant: 'destructive',
         });
       } finally {
         setLoading(false);
+        console.log('🏁 [CUSTOMER ORDERS] Fetch completed');
       }
     };
 
