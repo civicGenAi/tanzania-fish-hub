@@ -200,7 +200,7 @@ const SellerReviews: React.FC = () => {
               <div key={review.id} className="bg-card border border-border rounded-2xl p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <p className="font-semibold">{review.customer?.full_name || 'Anonymous'}</p>
+                    <p className="font-semibold">{review.customer?.profiles?.full_name || 'Anonymous'}</p>
                     <p className="text-sm text-muted-foreground">
                       {review.product?.name || 'Product'}
                     </p>
