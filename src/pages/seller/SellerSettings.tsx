@@ -57,16 +57,26 @@ const SellerSettings: React.FC = () => {
     haccp_certified: false,
     haccp_cert_number: '',
     haccp_expiry_date: '',
+    haccp_pending_approval: false,
+    haccp_approved: false,
     gap_certified: false,
     gap_cert_number: '',
     gap_expiry_date: '',
+    gap_pending_approval: false,
+    gap_approved: false,
     gmp_certified: false,
     gmp_cert_number: '',
     gmp_expiry_date: '',
+    gmp_pending_approval: false,
+    gmp_approved: false,
     msc_certified: false,
     msc_cert_number: '',
+    msc_pending_approval: false,
+    msc_approved: false,
     asc_certified: false,
     asc_cert_number: '',
+    asc_pending_approval: false,
+    asc_approved: false,
     sanitary_cert_number: '',
     sanitary_cert_expiry: '',
   });
@@ -134,16 +144,26 @@ const SellerSettings: React.FC = () => {
         haccp_certified: sellerProfile.haccp_certified || false,
         haccp_cert_number: sellerProfile.haccp_cert_number || '',
         haccp_expiry_date: sellerProfile.haccp_expiry_date || '',
+        haccp_pending_approval: sellerProfile.haccp_pending_approval || false,
+        haccp_approved: sellerProfile.haccp_approved || false,
         gap_certified: sellerProfile.gap_certified || false,
         gap_cert_number: sellerProfile.gap_cert_number || '',
         gap_expiry_date: sellerProfile.gap_expiry_date || '',
+        gap_pending_approval: sellerProfile.gap_pending_approval || false,
+        gap_approved: sellerProfile.gap_approved || false,
         gmp_certified: sellerProfile.gmp_certified || false,
         gmp_cert_number: sellerProfile.gmp_cert_number || '',
         gmp_expiry_date: sellerProfile.gmp_expiry_date || '',
+        gmp_pending_approval: sellerProfile.gmp_pending_approval || false,
+        gmp_approved: sellerProfile.gmp_approved || false,
         msc_certified: sellerProfile.msc_certified || false,
         msc_cert_number: sellerProfile.msc_cert_number || '',
+        msc_pending_approval: sellerProfile.msc_pending_approval || false,
+        msc_approved: sellerProfile.msc_approved || false,
         asc_certified: sellerProfile.asc_certified || false,
         asc_cert_number: sellerProfile.asc_cert_number || '',
+        asc_pending_approval: sellerProfile.asc_pending_approval || false,
+        asc_approved: sellerProfile.asc_approved || false,
         sanitary_cert_number: sellerProfile.sanitary_cert_number || '',
         sanitary_cert_expiry: sellerProfile.sanitary_cert_expiry || '',
       });
@@ -202,8 +222,47 @@ const SellerSettings: React.FC = () => {
   };
 
   const handleSaveProfile = async () => {
+    if (!sellerId) return;
     setLoading(true);
+
     try {
+      let avatarUrl = storeData.avatar_url;
+
+      // Upload avatar if a new image was selected
+      if (imageFile) {
+        try {
+          const fileExt = imageFile.name.split('.').pop();
+          const fileName = `${sellerId}-${Date.now()}.${fileExt}`;
+          const filePath = `avatars/${fileName}`;
+
+          // Upload to Supabase Storage
+          const { error: uploadError } = await supabase.storage
+            .from('profile-images')
+            .upload(filePath, imageFile, {
+              cacheControl: '3600',
+              upsert: true,
+            });
+
+          if (uploadError) {
+            console.error('Upload error:', uploadError);
+            toast({
+              title: 'Warning',
+              description: 'Profile updated but avatar upload failed. Please ensure "profile-images" storage bucket exists.',
+              variant: 'default',
+            });
+          } else {
+            // Get public URL
+            const { data: { publicUrl } } = supabase.storage
+              .from('profile-images')
+              .getPublicUrl(filePath);
+
+            avatarUrl = publicUrl;
+          }
+        } catch (uploadError) {
+          console.error('Avatar upload error:', uploadError);
+        }
+      }
+
       // Update user profile
       const { error: profileError } = await supabase
         .from('profiles')
@@ -215,10 +274,28 @@ const SellerSettings: React.FC = () => {
 
       if (profileError) throw profileError;
 
+      // Update seller profile with avatar URL
+      if (avatarUrl) {
+        const { error: avatarError } = await supabase
+          .from('seller_profiles')
+          .update({ avatar_url: avatarUrl })
+          .eq('id', sellerId);
+
+        if (avatarError) {
+          console.error('Error updating avatar URL:', avatarError);
+        } else {
+          setStoreData({ ...storeData, avatar_url: avatarUrl });
+          setImagePreview(avatarUrl);
+        }
+      }
+
       toast({
         title: 'Success',
-        description: 'Profile updated successfully',
+        description: imageFile ? 'Profile and avatar updated successfully' : 'Profile updated successfully',
       });
+
+      // Clear the image file after successful upload
+      setImageFile(null);
     } catch (error) {
       console.error('Error updating profile:', error);
       toast({
@@ -292,16 +369,47 @@ const SellerSettings: React.FC = () => {
     setLoading(true);
 
     try {
+      // Set certifications to pending approval if they were just checked
+      const updates = { ...certificationData };
+
+      // HACCP
+      if (certificationData.haccp_certified && !certificationData.haccp_approved) {
+        updates.haccp_pending_approval = true;
+      }
+
+      // GAP
+      if (certificationData.gap_certified && !certificationData.gap_approved) {
+        updates.gap_pending_approval = true;
+      }
+
+      // GMP
+      if (certificationData.gmp_certified && !certificationData.gmp_approved) {
+        updates.gmp_pending_approval = true;
+      }
+
+      // MSC
+      if (certificationData.msc_certified && !certificationData.msc_approved) {
+        updates.msc_pending_approval = true;
+      }
+
+      // ASC
+      if (certificationData.asc_certified && !certificationData.asc_approved) {
+        updates.asc_pending_approval = true;
+      }
+
       const { error } = await supabase
         .from('seller_profiles')
-        .update(certificationData)
+        .update(updates)
         .eq('id', sellerId);
 
       if (error) throw error;
 
+      // Update local state
+      setCertificationData(updates);
+
       toast({
         title: 'Success',
-        description: 'Certifications updated successfully',
+        description: 'Certifications submitted for approval. Admin will review shortly.',
       });
     } catch (error) {
       console.error('Error updating certifications:', error);
@@ -728,17 +836,29 @@ const SellerSettings: React.FC = () => {
             <div className="space-y-6">
               {/* HACCP */}
               <div className="p-4 bg-muted/30 rounded-xl">
-                <div className="flex items-center gap-3 mb-4">
-                  <input
-                    type="checkbox"
-                    checked={certificationData.haccp_certified}
-                    onChange={(e) => setCertificationData({ ...certificationData, haccp_certified: e.target.checked })}
-                    className="w-5 h-5 rounded border-border"
-                  />
-                  <div>
-                    <h4 className="font-medium">HACCP Certified</h4>
-                    <p className="text-sm text-muted-foreground">Hazard Analysis and Critical Control Points</p>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={certificationData.haccp_certified}
+                      onChange={(e) => setCertificationData({ ...certificationData, haccp_certified: e.target.checked })}
+                      className="w-5 h-5 rounded border-border"
+                    />
+                    <div>
+                      <h4 className="font-medium">HACCP Certified</h4>
+                      <p className="text-sm text-muted-foreground">Hazard Analysis and Critical Control Points</p>
+                    </div>
                   </div>
+                  {certificationData.haccp_approved && (
+                    <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
+                      ✓ Approved
+                    </span>
+                  )}
+                  {certificationData.haccp_pending_approval && !certificationData.haccp_approved && (
+                    <span className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-medium">
+                      ⏳ Pending Approval
+                    </span>
+                  )}
                 </div>
                 {certificationData.haccp_certified && (
                   <div className="grid md:grid-cols-2 gap-4 ml-8">

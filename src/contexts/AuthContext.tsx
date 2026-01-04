@@ -57,10 +57,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // If it's a "not found" error, that's expected for new users
+        if (error.code === 'PGRST116') {
+          console.log('Profile not found for user:', userId);
+          return null;
+        }
+        // For other errors (permissions, network, etc.), throw to be handled by caller
+        console.error('Error fetching profile:', error);
+        throw error;
+      }
       return data as UserProfile;
-    } catch (error) {
-      console.error('Error fetching profile:', error);
+    } catch (error: any) {
+      // Only return null for "not found" errors
+      if (error?.code === 'PGRST116') {
+        return null;
+      }
+      // For all other errors, log and return null to avoid breaking auth flow
+      // but log it prominently so we can debug
+      console.error('CRITICAL: Profile fetch failed:', error);
+      // Try one more time after a short delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      try {
+        const { data, error: retryError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+
+        if (!retryError && data) {
+          console.log('Profile fetched successfully on retry');
+          return data as UserProfile;
+        }
+      } catch (retryErr) {
+        console.error('Profile fetch retry also failed:', retryErr);
+      }
+      // If we get here, something is seriously wrong, but don't break auth
+      // Return null and let the app handle it
       return null;
     }
   };
